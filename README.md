@@ -1,15 +1,16 @@
-# Instalations
+## Instalations
 
-´´´
+```sh
+
 npm install --save terrabrasilis-api
 
-´´´
+```
 
-# Using the module
+## Using the module
 
 #### In Node.js
 
-´´´
+```sh
 var Terrabrasilis = require('terrabrasilis-api');
 
 
@@ -22,8 +23,8 @@ Terrabrasilis
     .enableScaleControlTool()
     .enableGeocodingTool();
 
-´´´
+```
 
-# Release History
+## Release History
 
 * 0.0.1 Initial release
