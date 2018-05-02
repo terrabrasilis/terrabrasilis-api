@@ -1,3 +1,5 @@
+const { Stack, Queue } = require('terrabrasilis-util');
+
 /**
  * This class use the Revealing Module Pattern.
  * 
@@ -82,16 +84,16 @@ var Terrabrasilis = (function(){
         //enableLayersControl();
         //enableScaleControl();     
         
-        mapScaleStack = new Stack();
-        redoScaleStack = new Queue();
+        mapScaleStack = Stack;
+        redoScaleStack = Queue;
 
         mapScaleStack.insert(zoom)
         redoScaleStack.insert(zoom);
         map.on('zoomend', function() {            
-            if(mapScaleStack.getLength() <= 5) {
-                mapScaleStack.insert(map.getZoom());
-                redoScaleStack.insert(map.getZoom());
-            }
+            //if(mapScaleStack.getLength() <= 5) {
+            mapScaleStack.insert(map.getZoom());
+            redoScaleStack.insert(map.getZoom());
+            //}
         });
 
         return this;
