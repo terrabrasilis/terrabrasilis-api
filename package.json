@@ -1,6 +1,6 @@
 {
   "name": "terrabrasilis-api",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "The api to build map and enable tools to use in webmap application",
   "main": "terrabrasilis.js",
   "scripts": {
@@ -8,11 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.dpi.inpe.br/terrabrasilis/terrabrasilis.git"
+    "url": "https://github.com/Terrabrasilis/terrabrasilis-api.git"
   },
   "keywords": [
     "api",
-    "webgis"
+    "webgis",
+    "map",
+    "leaflet",
+    "wms"
   ],
   "author": "Terrabrasilis team (André Carvalho, Jether Rodrigues, Luiz Assis)",
   "license": "MIT"
