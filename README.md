@@ -27,4 +27,4 @@ Terrabrasilis
 
 ## Release History
 
-* 0.0.2 Initial release
+* 0.0.2 Initial release [![Build Status](https://travis-ci.org/Terrabrasilis/terrabrasilis-api.svg?branch=master)](https://travis-ci.org/Terrabrasilis/terrabrasilis-api)
