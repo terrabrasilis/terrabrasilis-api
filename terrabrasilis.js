@@ -11,7 +11,7 @@ var Terrabrasilis = (function(){
      */
     let map;
     let mapScaleStack;
-    let redoScaleStack;
+    let redoScaleQueue;
     let baseLayersToShow;
     let overLayersToShow;
     let layerControl;
@@ -78,21 +78,15 @@ var Terrabrasilis = (function(){
         localStorage.setItem("lon", lon);
         localStorage.setItem("zoom", zoom);
 
-        //mountBaseLayers();        
-        //mountOverLayers();        
-        //enableDrawnFeature();
-        //enableLayersControl();
-        //enableScaleControl();     
-        
         mapScaleStack = Stack;
-        redoScaleStack = Queue;
+        redoScaleQueue = Queue;
 
         mapScaleStack.insert(zoom)
-        redoScaleStack.insert(zoom);
+        redoScaleQueue.insert(zoom);
         map.on('zoomend', function() {            
             //if(mapScaleStack.getLength() <= 5) {
             mapScaleStack.insert(map.getZoom());
-            redoScaleStack.insert(map.getZoom());
+            redoScaleQueue.insert(map.getZoom());
             //}
         });
 
@@ -142,11 +136,6 @@ var Terrabrasilis = (function(){
             maxZoom: 17,
             attribution: 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
         });
-
-        // var planet = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-        //     maxZoom: 17,
-        //     subdomains:['mt0','mt1','mt2','mt3']
-        // });
 
         var baseLayers = {
             'Blank': empty,
@@ -433,8 +422,8 @@ var Terrabrasilis = (function(){
             localStorage.getItem("lat")],
             localStorage.getItem("zoom"));
 
-        mapScaleStack = new Stack();
-        redoScaleStack = new Queue();
+        mapScaleStack.reset();
+        redoScaleQueue.reset();
     } 
     
     /**
@@ -553,7 +542,7 @@ var Terrabrasilis = (function(){
      * @param {*} event 
      */
     let redo = function (event) {
-        let letsGoTo = redoScaleStack.remove();
+        let letsGoTo = redoScaleQueue.remove();
         map.setView([
             localStorage.getItem("lon"),
             localStorage.getItem("lat")],
