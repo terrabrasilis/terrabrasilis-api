@@ -83,11 +83,10 @@ var Terrabrasilis = (function(){
 
         mapScaleStack.insert(zoom)
         redoScaleQueue.insert(zoom);
-        map.on('zoomend', function() {            
-            //if(mapScaleStack.getLength() <= 5) {
+        map.on('zoomend', function() {                        
             mapScaleStack.insert(map.getZoom());
             redoScaleQueue.insert(map.getZoom());
-            //}
+            console.log("add scale -> " + map.getZoom());
         });
 
         return this;
@@ -424,6 +423,7 @@ var Terrabrasilis = (function(){
 
         mapScaleStack.reset();
         redoScaleQueue.reset();
+        console.log("Reset stack and queue.");
     } 
     
     /**
@@ -529,11 +529,11 @@ var Terrabrasilis = (function(){
      */
     let undo = function (event) {
         let letsGoTo = mapScaleStack.remove();
+        console.log("undo to -> " + letsGoTo);
         map.setView([
             localStorage.getItem("lon"),
             localStorage.getItem("lat")],
-            letsGoTo);        
-        console.log("undo to -> " + letsGoTo);
+            letsGoTo);     
     }
 
     /**
@@ -543,11 +543,11 @@ var Terrabrasilis = (function(){
      */
     let redo = function (event) {
         let letsGoTo = redoScaleQueue.remove();
+        console.log("redo to -> " + letsGoTo);
         map.setView([
             localStorage.getItem("lon"),
             localStorage.getItem("lat")],
-            letsGoTo);
-        console.log("redo to -> " + letsGoTo);
+            letsGoTo);       
     }
 
     /**
