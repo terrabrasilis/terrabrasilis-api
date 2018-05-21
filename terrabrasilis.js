@@ -14,6 +14,7 @@ var Terrabrasilis = (function(){
     let redoScaleQueue;
     let baseLayersToShow;
     let overLayersToShow;
+    let legendToShow;
     let layerControl;
     let defaultLat = -52.685277;
     let defaultLon = -11.678782;
@@ -81,11 +82,18 @@ var Terrabrasilis = (function(){
         mapScaleStack = Stack;
         redoScaleQueue = Queue;
 
-        mapScaleStack.insert(zoom)
-        redoScaleQueue.insert(zoom);
-        map.on('zoomend', function() {                        
-            mapScaleStack.insert(map.getZoom());
-            redoScaleQueue.insert(map.getZoom());
+        map.on('zoomend', function(event) {                          
+            options = {
+                lat: localStorage.getItem("lat"),
+                lng: localStorage.getItem("lon"),
+                zoom: map.getZoom()
+            };
+
+            //console.log(map);
+
+            mapScaleStack.insert(options);
+            redoScaleQueue.insert(options);
+            
             console.log("add scale -> " + map.getZoom());
         });
 
@@ -93,173 +101,181 @@ var Terrabrasilis = (function(){
     }
 
     /**
-     * This method is used to mount all base layers to use in the terrabrasilis map     
+     * This method is used to mount all base layers to use in the terrabrasilis map   
+     * 
+     *  [{
+     *      "name":"",
+     *      "host":"",
+     *      "legend_color":null,
+     *      "workspace":"",
+     *      "active":false,
+     *      "subdomains":[
+     *          {
+     *             "domain":""
+     *          }
+     *      ],
+     *      "baselayer":true,
+     *      "attribution":"",
+     *      "opacity": value
+     *  }]
      */ 
-    let mountBaseLayers = function() {        
-        var openstreetmap = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-                '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ',
-            maxZoom: 18,
-            minZoom: 4
-        });
+    let mountBaseLayers = function(baseLayersOptions) {
+        let styledBaselayers = [];
+        let layersGroup = {
+            groupName : "BASELAYERS",
+            expanded : false
+        };
+        var baselayers = {};
+        
+        if(typeof(baseLayersOptions) == 'undefined' || baseLayersOptions === null) {
+            console.log("no objects defined to mount baselayers so using the OSM baselayer to up the app!")
+            baselayers = {
+                "OSM Default": L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+                                    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+                                        '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ', maxZoom: 18, minZoom: 4 })
+            };
+            baselayers["OSM Default"].addTo(map);
+            layersGroup.layers = baselayers;
+            styledBaselayers.push(layersGroup);  
+            baseLayersToShow = styledBaselayers;      
+            return this;
+        }           
+        
+        for(key in baseLayersOptions) {     
+            if (baseLayersOptions.hasOwnProperty(key)) {       
+                let bl = baseLayersOptions[key];
 
-        var openStreetMapBlackAndWhite = L.tileLayer('http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', {
-            attribution: 'Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            maxZoom: 18,        
-            minZoom: 4
-        });
+                if (bl.baselayer) {
+                    let options = {
+                        attribution: bl.attribution === null ? "" : bl.attribution,
+                        maxZoom: 18,
+                        minZoom: 4                    
+                    }
+                    if (bl.subdomains != null) {
+                        let domains = [];
+                        for(sd in bl.subdomains) {
+                            let dm = bl.subdomains[sd];
+                            domains.push(dm.domain);
+                        }                    
+                        options.subdomains = domains;
+                    }
+                    //console.log(options);
+                    var baselayer = L.tileLayer(bl.host, options);                
+                    baselayers[bl.title] = baselayer;
+                }
+            }                      
+        };        
+        layersGroup.layers = baselayers;
+        styledBaselayers.push(layersGroup);  
+        baseLayersToShow = styledBaselayers;        
 
-        var empty = L.tileLayer('');
-
-        var googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
-            maxZoom: 20,
-            subdomains:['mt0','mt1','mt2','mt3']
-        });
-
-        var googleHybrid = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
-            maxZoom: 20,
-            subdomains:['mt0','mt1','mt2','mt3']
-        });
-
-        var googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
-            maxZoom: 20,
-            subdomains:['mt0','mt1','mt2','mt3']
-        });
-
-        var googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',{
-            maxZoom: 20,
-            subdomains:['mt0','mt1','mt2','mt3']
-        });
-
-        var OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-            maxZoom: 17,
-            attribution: 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
-        });
-
-        var baseLayers = {
-            'Blank': empty,
-            'OSM' : openstreetmap,
-            'OSM-Black' : openStreetMapBlackAndWhite,
-            'Google-Satellite' : googleSat,
-            'Google-Hybrid' : googleHybrid,
-            'Google-Streets' : googleStreets,
-            'Google-Terrain' : googleTerrain,
-            'OpenTopoMap' : OpenTopoMap
+        for (const key in baseLayersOptions) {
+            if (baseLayersOptions.hasOwnProperty(key)) {
+                const toShow = baseLayersOptions[key];
+                if (toShow.active) {
+                    baselayers[toShow.title].addTo(map);
+                }                 
+            }
         }
-
-        baseLayersToShow = baseLayers;
-
-        // define the openstreetmap as main map layer    
-        //baseLayersToShow['OSM-Black'].addTo(map);
-        baseLayersToShow['OpenTopoMap'].addTo(map);
 
         return this;
     }
 
     /**
      * This method is used to mount all overlayers to use in the terrabrasilis map     
+     * 
+     * [{
+     *      "title":"",     
+     *      "name":"",
+     *      "host":"",
+     *      "legend_color":"",
+     *      "workspace":"",
+     *      "active":false,
+     *      "subdomain":[],
+     *      "baselayer":false,
+     *      "attribution": null,
+     *      "opacity": value
+     *  }]
      */
-    let mountOverLayers = function() {
-        /**
-         * Terrabrasilis Maps Service
-         */
-        var forest_2016 = L.tileLayer.wms(constants.TERRABRASILIS_MAPS_GWC, {
-            layers: 'fip-project-prodes:forest_2016',
-            format: 'image/png',
-            transparent: true
+    let mountOverLayers = function(overLayersOptions) {
+        let styledOverlayers = [];
+        let layersGroup = {
+            groupName : "PRODES AMZ",
+            expanded : true
+        };
+        let overlayers = {};
+
+        let legend = L.control.htmllegend({
+            position: 'bottomright',            
+            collapseSimple: true,
+            detectStretched: true,
+            collapsedOnInit: true,
+            defaultOpacity: 1.0,
+            visibleIcon: 'icon icon-eye',
+            hiddenIcon: 'icon icon-eye-slash'
         });
 
-        var forest_2017 = L.tileLayer.wms(constants.TERRABRASILIS_MAPS_GWC, {
-            layers: 'fip-project-prodes:forest_2017',
-            format: 'image/png',
-            transparent: true
-        });
-
-        var deforestation = L.tileLayer.wms(constants.TERRABRASILIS_MAPS_GWC, {
-            layers: 'fip-project-prodes:yearly_deforestation_2013_2017',
-            format: 'image/png',
-            transparent: true
-        });
-
-        var deforestation19882012 = L.tileLayer.wms(constants.TERRABRASILIS_MAPS_GWC, {
-            layers: 'fip-project-prodes:accumulated_deforestation_1988_2012',
-            format: 'image/png',
-            transparent: true
-        });
-
-        var hydrography = L.tileLayer.wms(constants.TERRABRASILIS_MAPS_GWC, {
-            layers: 'fip-project-prodes:hydrography',
-            format: 'image/png',
-            transparent: true
-        });
-
-        var noForest = L.tileLayer.wms(constants.TERRABRASILIS_MAPS_GWC, {
-            layers: 'fip-project-prodes:no_forest',
-            format: 'image/png',
-            transparent: true
-        });
-
-        var cloud2016 = L.tileLayer.wms(constants.TERRABRASILIS_MAPS_GWC, {
-            layers: 'fip-project-prodes:cloud_2016',
-            format: 'image/png',
-            transparent: true
-        });
-
-        var cloud2017 = L.tileLayer.wms(constants.TERRABRASILIS_MAPS_GWC, {
-            layers: 'fip-project-prodes:cloud_2017',
-            format: 'image/png',
-            transparent: true
-        });
-
-        var amazon_legal_limit = L.tileLayer.wms(constants.TERRABRASILIS_MAPS_GWC, {
-            layers: 'fip-project-prodes:brazilian_legal_amazon',
-            format: 'image/png',
-            transparent: true
-        });
-
-        /**
-         * Cbers4 AWFI
-         */
-        var cbers4_virtual_mosaic = L.tileLayer.wms(constants.FIPCERRADO_OPERACAO, {
-            layers: 'terraamazon:Cbers4_virtual_mosaic',
-            format: 'image/png',
-            transparent: true
-        });
-
-        var resourcesat2_virtual_mosaic = L.tileLayer.wms(constants.FIPCERRADO_OPERACAO, {
-            layers: 'terraamazon:Resourcesat2_virtual_mosaic',
-            format: 'image/png',
-            transparent: true
-        });
-
-        var landsat8_virtual_mosaic = L.tileLayer.wms(constants.FIPCERRADO_OPERACAO, {
-            layers: 'terraamazon:Landsat8_virtual_mosaic',
-            format: 'image/png',
-            transparent: true
-        });
-
-        var overlayersGroup = L.layerGroup([forest_2016, deforestation, deforestation19882012, amazon_legal_limit, noForest]);
+        if(typeof(overLayersOptions) == 'undefined' || overLayersOptions === null) {
+            overlayers = null;
+            console.log("no objects defined to mount overlayers!")
+            return this;
+        }           
         
-        var overLayers = {
-            'Products' : overlayersGroup,
-            'Hydrography' : hydrography,
-            'No Forest' : noForest,        
-            'Cloud 2016' : cloud2016,
-            'Cloud 2017' : cloud2017,
-            'Forest 2016' : forest_2016,
-            'Forest 2017 (Parcial 95 cenas)': forest_2017,
-            'Deforestation' : deforestation,
-            'Deforestation 1988_2012' : deforestation19882012,
-            'Legal Amazon' : amazon_legal_limit,
-            'Cbers4 AWFI Virtual Mosaic' : cbers4_virtual_mosaic,
-            'ResourceSat2 Virtual Mosaic' : resourcesat2_virtual_mosaic,
-            'Landsat8_virtual_mosaic' : landsat8_virtual_mosaic
+        for (const key in overLayersOptions) {  
+            if (overLayersOptions.hasOwnProperty(key)) {
+                const ol = overLayersOptions[key];
+
+                if (!ol.baselayer) {
+                    let options = {
+                        layers: ol.workspace + ":" + ol.name,
+                        format: 'image/png',
+                        transparent: true
+                    }
+                    if (ol.subdomains != null) {
+                        if (ol.subdomains.length > 0) {
+                            let domains = [];
+                            for (const key in ol.subdomains) {
+                                if (ol.subdomains.hasOwnProperty(key)) {
+                                    const dm = ol.subdomains[key];
+                                    domains.push(dm.domain);
+                                }
+                            }                    
+                            options.subdomains = domains;   
+                        }                        
+                    }
+                    var overlayer = L.tileLayer.wms(ol.host, options);                
+                    overlayers[ol.title] = overlayer;
+
+                    legend.addLegend({
+                        name: ol.title,
+                        layer: overlayer,
+                        opacity: ol.opacity,
+                        elements: [{
+                            //label: 'value' //if define label, the presentation of legend change
+                            html: '',
+                            style: {
+                                'background-color': ol.legend_color,
+                                'width': '10px',
+                                'height': '10px'
+                            }
+                        }]
+                    });       
+                } 
+            }                
+        };      
+        layersGroup.layers = overlayers;
+        styledOverlayers.push(layersGroup);  
+        overLayersToShow = styledOverlayers;
+        legendToShow = legend;
+
+        for (const key in overLayersOptions) {
+            if (overLayersOptions.hasOwnProperty(key)) {
+                const toShow = overLayersOptions[key];
+                if (toShow.active) {
+                    overlayers[toShow.title].addTo(map);
+                }                
+            }
         }
-
-        overLayersToShow = overLayers;
-
-        // define a layer to be the actived layer    
-        overLayersToShow['Products'].addTo(map);
 
         return this;
     }
@@ -361,13 +377,32 @@ var Terrabrasilis = (function(){
     /**
      * this method enable the leaflet layers control
      */
-    let enableLayersControl = function() {
+    let enableLayersControl = function() {        
+        /**
+         * davicustodio.github.io/Leaflet.StyledLayerControl/examples/example2.html 
+         * Using styled layer group 
+         */       
         var options = {
-            sortLayers : true,
-            collapsed : true
-        }
-        layerControl = L.control.layers(baseLayersToShow, overLayersToShow, options).addTo(map);
+            container_width 	: "300px",
+            group_maxHeight     : "300px",          
+            exclusive       	: true,
+            //sortLayers          : true,
+            collapsed           : true
+        };
 
+        //layerControl = L.control.layers(baseLayersToShow, overLayersToShow, options).addTo(map);     
+        layerControl = L.Control.styledLayerControl(baseLayersToShow, overLayersToShow, options).addTo(map);    
+
+        return this;
+    }
+
+    let enableLegendAndToolToLayers = function() {        
+        if(typeof(legendToShow) == 'undefined' || legendToShow === null) {
+            overlayers = null;
+            return this;
+        }
+
+        map.addControl(legendToShow);
         return this;
     }
 
@@ -376,7 +411,6 @@ var Terrabrasilis = (function(){
      */
     let enableScaleControl = function() {
         L.control.scale().addTo(map); 
-
         return this;
     }
 
@@ -527,13 +561,19 @@ var Terrabrasilis = (function(){
      * 
      * @param {*} event 
      */
-    let undo = function (event) {
+    let undo = function () {
         let letsGoTo = mapScaleStack.remove();
-        console.log("undo to -> " + letsGoTo);
-        map.setView([
-            localStorage.getItem("lon"),
-            localStorage.getItem("lat")],
-            letsGoTo);     
+        console.log("undo to -> ");
+        console.log(letsGoTo)
+            
+        if(letsGoTo !== 'undefined') {
+            if(letsGoTo.zoom === map.getZoom())
+                letsGoTo = mapScaleStack.remove();            
+            map.setView([
+                letsGoTo.lng
+                , letsGoTo.lat]
+                , letsGoTo.zoom);     
+        }        
     }
 
     /**
@@ -541,13 +581,19 @@ var Terrabrasilis = (function(){
      * 
      * @param {*} event 
      */
-    let redo = function (event) {
+    let redo = function () {
         let letsGoTo = redoScaleQueue.remove();
-        console.log("redo to -> " + letsGoTo);
-        map.setView([
-            localStorage.getItem("lon"),
-            localStorage.getItem("lat")],
-            letsGoTo);       
+        console.log("redo to -> ");
+        console.log(letsGoTo)
+            
+        if(letsGoTo !== 'undefined') {
+            if(letsGoTo.zoom === map.getZoom())
+                letsGoTo = redoScaleQueue.remove();        
+            map.setView([
+                letsGoTo.lng
+                , letsGoTo.lat]
+                , letsGoTo.zoom);     
+        }
     }
 
     /**
@@ -801,6 +847,16 @@ var Terrabrasilis = (function(){
             alert("No data to add layer on the map!");
             return;
         }
+
+        let legend = L.control.htmllegend({
+            position: 'bottomleft',            
+            collapseSimple: true,
+            detectStretched: true,
+            collapsedOnInit: true,
+            defaultOpacity: 1.0,
+            visibleIcon: 'icon icon-eye',
+            hiddenIcon: 'icon icon-eye-slash'
+        });
        
         let options = layerOptions;
 
@@ -812,7 +868,23 @@ var Terrabrasilis = (function(){
             transparent: true
         });
 
+        legend.addLegend({
+            name: options.layerName,
+            layer: layer,
+            opacity: 1.0,
+            elements: [{
+                label: options.layerName, 
+                html: '',
+                style: {
+                    'background-color': '',
+                    'width': '10px',
+                    'height': '10px'
+                }
+            }]
+        });
+
         layerControl.addOverlay(layer, options.layerName);
+        map.addControl(legend);
         map.addLayer(layer);
         //console.log(layerControl);       
     }
@@ -863,6 +935,7 @@ var Terrabrasilis = (function(){
         enableLayersControlTool:  enableLayersControl,
         enableScaleControlTool:  enableScaleControl,
         enableGeocodingTool: enableGeocodingControl,
+        enableLegendAndToolToLayers: enableLegendAndToolToLayers,
 
         /**
          * general tools

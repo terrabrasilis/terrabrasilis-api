@@ -1,6 +1,6 @@
 {
   "name": "terrabrasilis-api",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "The api to build map and enable tools to use in webmap application",
   "main": "terrabrasilis.js",
   "scripts": {
@@ -20,6 +20,6 @@
   "author": "Terrabrasilis team (André Carvalho, Jether Rodrigues, Luiz Assis)",
   "license": "GPL-3.0",
   "dependencies": {
-    "terrabrasilis-util": "0.0.3"
+    "terrabrasilis-util": "latest"
   }
 }
