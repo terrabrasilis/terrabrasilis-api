@@ -868,7 +868,7 @@ var Terrabrasilis = (function(){
             transparent: true
         });
 
-        legend.addLegend({
+        legendToShow.addLegend({
             name: options.layerName,
             layer: layer,
             opacity: 1.0,
@@ -883,10 +883,14 @@ var Terrabrasilis = (function(){
             }]
         });
 
-        layerControl.addOverlay(layer, options.layerName);
-        map.addControl(legend);
+        //http://maps.geovoxel.com/geoserver/ows
+        groupLayer = {
+            groupName : "BY GETCAPABILITIES"
+        }
+
+        //layerControl.addOverlay(layer, options.layerName);
+        layerControl.addOverlay(layer, options.layerName, groupLayer);
         map.addLayer(layer);
-        //console.log(layerControl);       
     }
 
     /**
