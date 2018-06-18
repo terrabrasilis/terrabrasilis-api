@@ -32,6 +32,9 @@ Terrabrasilis
 Travis CI: [![Build Status](https://travis-ci.org/Terrabrasilis/terrabrasilis-api.svg?branch=master)](https://travis-ci.org/Terrabrasilis/terrabrasilis-api)
 
 * 0.0.1 Initial release 
-* 0.0.2 Initial release
-* 0.0.3 Initial release
-* 0.0.4 Initial release
+* 0.0.2 release
+* 0.0.3 release
+* 0.0.4 release
+* 0.0.5 release
+* 0.0.6 release
+* 0.0.7 release [latest]
