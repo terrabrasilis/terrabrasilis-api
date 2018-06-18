@@ -601,111 +601,52 @@ var Terrabrasilis = (function(){
      * 
      * @param event 
      */
-    // let getLayerFeatureInfo = function (event) {
-    //     let popup = new L.Popup({ 
-    //         maxWidth: 400
-    //     });
-
-    //     /**
-    //      * get values
-    //      */
-    //     let latLngStr = "(" + event.latlng.lat + ", " + event.latlng.lng + ")";
-    //     let bbox = this.getBounds()._southWest.lng + ", " + this.getBounds()._southWest.lat + ", " 
-    //                     + this.getBounds()._northEast.lng + ", " + this.getBounds()._northEast.lat;
-    //     let width = this.getSize().x;
-    //     let height = this.getSize().y; 
-    //     let X = this.layerPointToContainerPoint(event.layerPoint).x;
-    //     let Y = this.layerPointToContainerPoint(event.layerPoint).y; 
-        
-    //     /**
-    //      * create the URL string
-    //      */
-    //     let result = [];
-    //     this.eachLayer(layer => { 
-    //         if(layer.options.layers) {
-    //             console.log(layer);
-    //             result.push(constants.FEATURE_INFO_PARAMS
-    //                             .replace(/\{0\}/g, getHost(layer._url))
-    //                             .replace(/\{1\}/g, layer.options.layers)
-    //                             .replace(/\{2\}/g, layer.options.layers)
-    //                             .replace(/\{3\}/g, bbox)
-    //                             .replace(/\{4\}/g, width)
-    //                             .replace(/\{5\}/g, height)
-    //                             .replace(/\{6\}/g, "application/json")
-    //                             .replace(/\{7\}/g, X.toFixed(0))
-    //                             .replace(/\{8\}/g, Y.toFixed(0)));
-    //         }
-    //     });
-
-    //     popup.setLatLng(event.latlng);
-
-    //     let resultJson = [];
-    //     result.forEach(item => {
-    //         console.log(item);
-    //         $.ajax({
-    //             url: item,
-    //             datatype: "json",
-    //             type: "GET",
-    //             success: function(data) {		    
-    //                 resultJson.push(data);
-    //             }
-    //        });      
-    //         //popup.setContent("<iframe src='"+ item +"' width='550' height='250' frameborder='0'></iframe>");            
-    //     });
-
-    //     console.log(resultJson);
-                
-    //     //popup.setContent("<iframe src='"+ urlGetfeatureInfo +"' width='550' height='250' frameborder='0'></iframe>");
-    //     //popup.setContent("");
-    //     this.openPopup(popup);
-    // }
-
-    /**
-     * This method get the feature layer info (just selected layers)
-     * 
-     * @param event 
-     */
     let getLayerFeatureInfo = function (event) {
-        let urls = getFeatureInfoUrl(event),
-            showResults = L.Util.bind(showGetFeatureInfo, this);
-        
-        // urls.forEach(url => {
-        //     $.ajax({
-        //         url: url,
-        //         success: function (data, status, xhr) {
-        //             var err = typeof data === 'string' ? null : data;
-    
-        //             showResults(err, event.latlng, data);
-        //         },
-        //         error: function (xhr, status, error) {
-        //             showResults(error);  
-        //         }
-        //     });    
-        // });    
-                
-        showResults(null, event.latlng, urls);
-        
-        /**
-         * deprecated
-         */
-        // let html="";
-        // result.forEach(_url => {
-        //     // $.ajax({
-        //     //     url: _url,
-        //     //     datatype: "json",
-        //     //     type: "GET",
-        //     //     success: function(data) {
-        //     //         console.log(data);		    
-        //     //         var feature = data.features[0];   
-                                 
-        //     //         L.popup({
-        //     //             maxWidth:400
-        //     //         }).setLatLng(event.latlng)
-        //     //         .setContent(L.Util.template("", feature.properties))
-        //     //         .openOn(map);
-        //     //         }
-        //     //     });                                                        
-        // });
+        let proxy_url = "http://terrabrasilis2.dpi.inpe.br:7000/cgi-bin/proxy.cgi?url="; 
+        let urls = getFeatureInfoUrlJson(event);
+
+        let table = "<div class=\"table-responsive\"><br/>"
+            + "<table id=\"getfeatureinfo\" class=\"table table-striped\">"
+            //+ "<thead><tr><th scope=\"col\" colspan=\"3\">Informações - " + event.latlng + "</th></tr></thead>";
+            + "<tbody></tbody></table></div>";
+
+        L.popup({ 
+            maxWidth: "auto",
+            minWidth: 450
+        }).setLatLng(event.latlng)            
+          .setContent(table)
+          .openOn(map);
+
+        urls.forEach(url => {
+            let urlToGetInfo = proxy_url + encodeURIComponent(url);
+            let tableBody = "";      
+            $.ajax({
+                url: urlToGetInfo,
+                async: true,
+                success: function (data, status, xhr) {
+                    var err = typeof data === 'string' ? null : data;  
+
+                    data.features.forEach(element => {      
+                        /**
+                         * https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/Object/entries
+                         */                       
+                        tableBody += "<tr class=\"table-active\">"
+                                + "<td colspan=\"3\"><b>"+ (element.id.split(".")[0]).toUpperCase() +"</b></td>"
+                                + "</tr>";
+                        Object.entries(element.properties).forEach(([key, value]) => {     
+                            tableBody += "<tr>"
+                                + "<td>" + key + "</td>"
+                                + "<td colspan=\"2\">" + value + "</td>"
+                                + "</tr>";
+                        });                        
+                    }); 
+                    $("#getfeatureinfo").last().append(tableBody);
+
+                }, error: function (xhr, status, error) {
+                    console.log(error);
+                }
+            });
+        });   
     }
 
     /**
@@ -719,19 +660,16 @@ var Terrabrasilis = (function(){
             bounds = map.getBounds();
 
         let result = [];
-        map.eachLayer(layer => {        
-            //console.log(layer);
+        map.eachLayer(layer => {                    
             let iframeTemplate = "<iframe src='#url#' width='450' height='auto' frameborder='0'></iframe>";
             let match = /gwc\/service/;                    
             if(layer.options.layers) {
                 defaultParams = {
                     request: 'GetFeatureInfo',
-                    service: 'WMS',
-                    //srs: layer._crs.code,
+                    service: 'WMS',                    
                     srs: 'EPSG:4326',
                     styles: layer.wmsParams.styles,
                     transparent: layer.wmsParams.transparent,
-                    //transparent:true,
                     version: layer.wmsParams.version,      
                     format: layer.wmsParams.format,
                     format:'',
@@ -739,12 +677,10 @@ var Terrabrasilis = (function(){
                     height: size.y.toFixed(0),
                     width: size.x.toFixed(0),
                     layers: layer.wmsParams.layers,
-                    query_layers: layer.wmsParams.layers,
-                    //info_format: 'text/html'
+                    query_layers: layer.wmsParams.layers,                    
                 };
 
                 paramsOptions = {
-                    //'info_format': 'application/json',
                     'info_format': 'text/html',
                     //'propertyName': 'NAME,AREA_CODE,DESCRIPTIO'
                 }
@@ -756,8 +692,50 @@ var Terrabrasilis = (function(){
                 
                 let url = match.test(layer._url) == true 
                     ? layer._url.replace("gwc/service", layer.wmsParams.layers.split(':')[0]) : layer._url;                
-                result.push(iframeTemplate.replace("#url#", url + L.Util.getParamString(params, url, true)));    
-                //result.push(url + L.Util.getParamString(params, url, true));            
+                result.push(iframeTemplate.replace("#url#", url + L.Util.getParamString(params, url, true)));                    
+            }
+        }); 
+        return result;
+    }
+
+    /**
+     * treats the layers url to get feature info in JSON format
+     * 
+     * @param {*} event 
+     */
+    let getFeatureInfoUrlJson = function (event) {
+        let point = map.latLngToContainerPoint(event.latlng, map.getZoom()), 
+            size = map.getSize(),
+            bounds = map.getBounds();
+
+        let result = [];
+        map.eachLayer(layer => {                    
+            let match = /gwc\/service/;                
+            if(layer.options.layers) {
+                defaultParams = {
+                    request: 'GetFeatureInfo',
+                    service: 'WMS',
+                    version: layer.wmsParams.version,      
+                    bbox: bounds.toBBoxString(),
+                    height: size.y.toFixed(0),
+                    width: size.x.toFixed(0),
+                    layers: layer.wmsParams.layers,
+                    query_layers: layer.wmsParams.layers,
+                    typename: layer.wmsParams.layers
+                };
+
+                paramsOptions = {
+                    'info_format': 'application/json'
+                }
+
+                params = L.Util.extend(defaultParams, paramsOptions || {});
+        
+                params[params.version === '1.3.0' ? 'i' : 'x'] = point.x;
+                params[params.version === '1.3.0' ? 'j' : 'y'] = point.y;                
+                
+                let url = match.test(layer._url) == true 
+                    ? layer._url.replace("gwc/service", layer.wmsParams.layers.split(':')[0]) : layer._url;   
+                result.push(url + L.Util.getParamString(params, url, true));            
             }
         }); 
         return result;
