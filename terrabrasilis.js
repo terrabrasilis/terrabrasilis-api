@@ -1056,7 +1056,7 @@ var Terrabrasilis = (function(){
      *  {
      *      geospatialHost:  'value',
      *      workspace:       'value',
-     *      layerName:       'value',
+     *      name:            'value',
      *      active:          'value',
      *  }
      * 
@@ -1069,7 +1069,7 @@ var Terrabrasilis = (function(){
             return;
         }
 
-        if (customized) {
+        if (!customized) {
             let legend = L.control.htmllegend({
                 position: 'bottomleft',            
                 collapseSimple: true,
@@ -1085,17 +1085,17 @@ var Terrabrasilis = (function(){
             //console.log(options);
     
             let layer = L.tileLayer.wms(options.geospatialHost, {
-                layers:  options.workspace + ':' + options.layerName,
+                layers:  options.workspace + ':' + options.name,
                 format: 'image/png',
                 transparent: true
             });
     
             legendToShow.addLegend({
-                name: options.layerName,
+                name: options.name,
                 layer: layer,
                 opacity: 1.0,
                 elements: [{
-                    label: options.layerName, 
+                    label: options.name, 
                     html: '',
                     style: {
                         'background-color': '',
@@ -1104,30 +1104,52 @@ var Terrabrasilis = (function(){
                     }
                 }]
             });
-    
-            //http://maps.geovoxel.com/geoserver/ows
+            
             groupLayer = {
                 groupName : "BY GETCAPABILITIES"
             }
     
-            //layerControl.addOverlay(layer, options.layerName);
-            layerControl.addOverlay(layer, options.layerName, groupLayer);
+            //layerControl.addOverlay(layer, options.name);
+            layerControl.addOverlay(layer, options.name, groupLayer);
             map.addLayer(layer);
         } 
 
-        if(!customized) {
-            let options = layerOptions;
-    
-            //console.log(options);
-    
+        if(customized) {
+            let options = layerOptions;    
+            //console.log(options);    
             let layer = L.tileLayer.wms(options.geospatialHost, {
-                layers:  options.workspace + ':' + options.layerName,
+                layers:  options.workspace + ':' + options.name,
                 format: 'image/png',
                 transparent: true
             });
     
-            layerControl.addOverlay(layer, options.layerName);            
+            layerControl.addOverlay(layer, options.name);            
             map.addLayer(layer);
+
+            // let html = "<mat-accordion displayMode=\"flat\">"
+            //     + "<mat-expansion-panel>"
+            //     + "<mat-expansion-panel-header>"
+            //     + "    <mat-panel-title>"
+            //     + "    <mat-slide-toggle " 
+            //     + "        color=\"primary\""
+            //     + "        checked=\"true\""
+            //     + "        (change)=\"layerOverLayerOnOff(" + layer + ")\"></mat-slide-toggle>&nbsp;"
+            //     + "        <p style=\"white-space:nowrap;\">" + layer.name + "</p>"
+            //     + "    </mat-panel-title>"
+            //     + "</mat-expansion-panel-header>"
+            //     + "<mat-slider "
+            //     + "    color=\"primary\""
+            //     + "    pressed"
+            //     + "    thumbLabel"
+            //     + "    tickInterval=\"0.1\""
+            //     + "    [max]=\"max\""
+            //     + "    [min]=\"min\""
+            //     + "    [step]=\"step\"" 
+            //     + "    value=\"1.0\""
+            //     + "    (input)=\"layerOpacity(" + layer + ", $event)\"></mat-slider>" 
+            //     + "</mat-expansion-panel>"
+            //     + "</mat-accordion>";
+            // $('.third-party:last').after(html);
         }
     }
 
