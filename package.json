@@ -1,7 +1,7 @@
 {
   "name": "terrabrasilis-api",
-  "version": "0.0.9",
-  "description": "The api to build map and enable tools to use in webmap application",
+  "version": "0.0.10",
+  "description": "API to build map and enable tools to use in Terrabrasilis webmap application",
   "main": "terrabrasilis.js",
   "scripts": {
     "test": "echo \"Msg: Building without test yet.\""

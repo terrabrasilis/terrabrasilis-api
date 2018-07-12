@@ -297,6 +297,7 @@ var Terrabrasilis = (function(){
             return this;
         }           
         
+        let zIndexCount = 199;
         for (const key in overLayersOptions) {  
             if (overLayersOptions.hasOwnProperty(key)) {
                 const ol = overLayersOptions[key];
@@ -307,7 +308,8 @@ var Terrabrasilis = (function(){
                         format: 'image/png',
                         transparent: true,
                         _name: ol.name,
-                        _baselayer: ol.baselayer
+                        _baselayer: ol.baselayer,
+                        zIndex: zIndexCount++
                     }
                     if (ol.subdomains != null) {
                         if (ol.subdomains.length > 0) {
@@ -375,7 +377,7 @@ var Terrabrasilis = (function(){
      *  }]
      */
     let mountCustomizedOverLayers = function(overLayersOptions) {        
-        let overlayers = {};
+        let overlayers = {};       
 
         if(typeof(overLayersOptions) == 'undefined' || overLayersOptions === null) {
             overlayers = null;
@@ -383,6 +385,7 @@ var Terrabrasilis = (function(){
             return this;
         }           
         
+        let zIndexCount = 199;
         for (const key in overLayersOptions) {  
             if (overLayersOptions.hasOwnProperty(key)) {
                 const ol = overLayersOptions[key];
@@ -393,7 +396,8 @@ var Terrabrasilis = (function(){
                         format: 'image/png',
                         transparent: true,
                         _name: ol.name,
-                        _baselayer: ol.baselayer
+                        _baselayer: ol.baselayer,
+                        zIndex: zIndexCount++
                     }
                     if (ol.subdomains != null) {
                         if (ol.subdomains.length > 0) {
@@ -535,7 +539,7 @@ var Terrabrasilis = (function(){
             collapsed           : true
         };
 
-        layerControl = L.control.layers(baseLayersToShow, overLayersToShow, options).addTo(map);     
+        layerControl = L.control.layers(baseLayersToShow, overLayersToShow, options).addTo(map);
         //layerControl = L.Control.styledLayerControl(baseLayersToShow, overLayersToShow, options).addTo(map);    
 
         return this;
@@ -922,7 +926,7 @@ var Terrabrasilis = (function(){
                 let name = l.options._name;
                 if (name === layerName) {
                     layer = l;  
-                    console.log(l);
+                    //console.log(l);
                 }                
             }
         });
@@ -999,8 +1003,77 @@ var Terrabrasilis = (function(){
     /**
      * This method receives a layer and move to back from others layers
      */
-    let moveLayerToBackOthers = function(layer) {        
-        layer.bringToBack();       
+    let moveLayerToFront = function(layer, value) { 
+        let layersOnMap = new Array();  
+        let layers = Object.values(layerControl._map._layers);
+        for (let index = 0; index < layers.length; index++) {
+            const element = layers[index];
+            if (element.options.hasOwnProperty("_baselayer")) {
+                if(!element.options._baselayer) {
+                    layersOnMap.push(element);
+                }   
+            }
+        }             
+        //console.log(layersOnMap);
+
+        let layerId = layer._leaflet_id
+        for (let index = 0; index < layersOnMap.length; index++) {
+            const element = layersOnMap[index];
+            if(!(element._leaflet_id === layerId)) {
+                if(layer.options.zIndex < element.options.zIndex) {
+                    console.log("moveLayerToFront from [ " + layer.options._name + " ] to [ " + element.options._name + " ]");
+                
+                    let elementZIndex = element.options.zIndex;
+                    let layerZIndex = layer.options.zIndex;
+
+                    layer.setZIndex(elementZIndex);
+                    layer.options.zIndex = elementZIndex;
+
+                    element.setZIndex(layerZIndex);
+                    element.options.zIndex = layerZIndex;
+
+                    break;
+                }
+            }
+        }        
+    }
+
+    /**
+     * This method receives a layer and move to from from others layers
+     */
+    let moveLayerToBack = function(layer, value) {        
+        let layersOnMap = new Array();  
+        let layers = Object.values(layerControl._map._layers);
+        for (let index = 0; index < layers.length; index++) {
+            const element = layers[index];
+            if (element.options.hasOwnProperty("_baselayer")) {
+                if(!element.options._baselayer) {
+                    layersOnMap.push(element);
+                }   
+            }
+        }             
+        //console.log(layersOnMap);
+        
+        let layerId = layer._leaflet_id
+        for (let index = 0; index < layersOnMap.length; index++) {
+            const element = layersOnMap[index];
+            if(!(element._leaflet_id === layerId)) {
+                if(layer.options.zIndex > element.options.zIndex) {
+                    console.log("moveLayerToBack [ " + layer.options._name + " ] to [ " + element.options._name + " ]");
+                
+                    let elementZIndex = element.options.zIndex;
+                    let layerZIndex = layer.options.zIndex;
+
+                    layer.setZIndex(elementZIndex);
+                    layer.options.zIndex = elementZIndex;
+
+                    element.setZIndex(layerZIndex);
+                    element.options.zIndex = layerZIndex;
+
+                    break;
+                }
+            }
+        }
     }
     
     /**
@@ -1023,12 +1096,15 @@ var Terrabrasilis = (function(){
      */
     let getTerrabrasilisOverlayers = function () {
         let result = [];
-
+        
         map.eachLayer(layer => {        
             console.log(layer);
-            if(!layer.options._baselayer) {
-                result.push(layer);
-            }
+            //console.log(layer.options);            
+            if (layer.options.hasOwnProperty("_baselayer")) {
+                if(!layer.options._baselayer) {
+                    result.push(layer);
+                }   
+            }            
         });
 
         return result;
@@ -1115,41 +1191,19 @@ var Terrabrasilis = (function(){
         } 
 
         if(customized) {
-            let options = layerOptions;    
-            //console.log(options);    
-            let layer = L.tileLayer.wms(options.geospatialHost, {
-                layers:  options.workspace + ':' + options.name,
+            let ol = layerOptions;
+            let options = {
+                layers: ol.workspace + ":" + ol.name,
                 format: 'image/png',
-                transparent: true
-            });
-    
-            layerControl.addOverlay(layer, options.name);            
+                transparent: true,
+                _name: ol.name,
+                _baselayer: ol.baselayer,
+                _thirdlayer: true
+            }            
+            var layer = L.tileLayer.wms(ol.geospatialHost, options); 
+                
+            layerControl.addOverlay(layer, ol.name);            
             map.addLayer(layer);
-
-            // let html = "<mat-accordion displayMode=\"flat\">"
-            //     + "<mat-expansion-panel>"
-            //     + "<mat-expansion-panel-header>"
-            //     + "    <mat-panel-title>"
-            //     + "    <mat-slide-toggle " 
-            //     + "        color=\"primary\""
-            //     + "        checked=\"true\""
-            //     + "        (change)=\"layerOverLayerOnOff(" + layer + ")\"></mat-slide-toggle>&nbsp;"
-            //     + "        <p style=\"white-space:nowrap;\">" + layer.name + "</p>"
-            //     + "    </mat-panel-title>"
-            //     + "</mat-expansion-panel-header>"
-            //     + "<mat-slider "
-            //     + "    color=\"primary\""
-            //     + "    pressed"
-            //     + "    thumbLabel"
-            //     + "    tickInterval=\"0.1\""
-            //     + "    [max]=\"max\""
-            //     + "    [min]=\"min\""
-            //     + "    [step]=\"step\"" 
-            //     + "    value=\"1.0\""
-            //     + "    (input)=\"layerOpacity(" + layer + ", $event)\"></mat-slider>" 
-            //     + "</mat-expansion-panel>"
-            //     + "</mat-accordion>";
-            // $('.third-party:last').after(html);
         }
     }
 
@@ -1200,7 +1254,8 @@ var Terrabrasilis = (function(){
         deactiveLayer: deactiveLayer,
         activeLayer: activeLayer,
         setOpacityToLayer: setOpacityToLayer,
-        moveLayerToBackOthers: moveLayerToBackOthers      
+        moveLayerToBack: moveLayerToBack,
+        moveLayerToFront: moveLayerToFront
     }
      
 })(Terrabrasilis || {});
