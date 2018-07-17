@@ -10,6 +10,21 @@ npm install --save terrabrasilis-api
 
 ## Using the module
 
+```json
+let overlayers = [{
+     "title":"",
+     "name":"",
+     "host":"",
+     "legend_color":"",
+     "workspace":"",
+     "active":true,
+     "subdomains":null,
+     "baselayer":false,
+     "attribution":"",
+     "opacity": 0.9
+}]
+```
+
 #### In Node.js
 
 ```sh
@@ -25,12 +40,12 @@ Terrabrasilis
     .enableScaleControlTool()
     .enableGeocodingTool();
     
-// mount a simple map without LayerControl visible
+// mount a simple map 
 Terrabrasilis
      .map(lat, lon, zoom, 'div to mount the map') 
      .addBaseLayers()
-     .addOverLayers()
-     .hideStandardLayerControl();
+     .addOverLayers(overlayers)
+     .hideStandardLayerControl(); // disable LayerControl
 ```
 
 ## Release History
