@@ -15,7 +15,7 @@ npm install --save terrabrasilis-api
 ```sh
 var Terrabrasilis = require('terrabrasilis-api');
 
-
+// just standard config
 Terrabrasilis
     .map() 
     .addBaseLayers()
@@ -24,7 +24,13 @@ Terrabrasilis
     .enableLayersControlTool()
     .enableScaleControlTool()
     .enableGeocodingTool();
-
+    
+// mount a simple map without LayerControl visible
+Terrabrasilis
+     .map(lat, lon, zoom, 'div to mount the map') 
+     .addBaseLayers()
+     .addOverLayers()
+     .hideStandardLayerControl();
 ```
 
 ## Release History
