@@ -10,6 +10,7 @@ var Terrabrasilis = (function(){
      * variables
      */
     let map;
+    let clickToolsActivate = false;
     let mapScaleStack;
     let redoScaleQueue;
     let baseLayersToShow;
@@ -237,7 +238,8 @@ var Terrabrasilis = (function(){
                         options.subdomains = domains;
                     }
                     //console.log(options);
-                    var baselayer = L.tileLayer(bl.host, options);                
+                    var baselayer = L.tileLayer(bl.host, options);
+                    baselayer.setZIndex(0);                
                     baselayers[bl.title] = baselayer;
                 }
             }                      
@@ -618,8 +620,8 @@ var Terrabrasilis = (function(){
         } else {            
             map.toggleFullscreen();
         }    
-    }    
-
+    } 
+    
     /**
      * This method return the layer geoJSON data
      * 
@@ -750,13 +752,12 @@ var Terrabrasilis = (function(){
      * 
      * @param event 
      */
-    let getLayerFeatureInfo = function (event) {
+    let getLayerFeatureInfo = function (event, showInPopup) {
         let proxy_url = "http://terrabrasilis2.dpi.inpe.br:7000/cgi-bin/proxy.cgi?url="; 
         let urls = getFeatureInfoUrlJson(event);
 
         let table = "<div class=\"table-responsive\"><br/>"
             + "<table id=\"getfeatureinfo\" class=\"table table-striped\">"
-            //+ "<thead><tr><th scope=\"col\" colspan=\"3\">Informações - " + event.latlng + "</th></tr></thead>";
             + "<tbody></tbody></table></div>";
 
         L.popup({ 
@@ -1214,6 +1215,60 @@ var Terrabrasilis = (function(){
         return map;
     }
 
+    /**
+     * add GetLayerFeatureInfo event to map
+     */
+    let addGetLayerFeatureInfoEventToMap = function (event) {
+        //if ( !clickToolsActivate ) {
+            let element = event.target;        
+            let hasClass = element.classList.contains( "md-off" );        
+            
+            if (hasClass) {
+                $( element ).removeClass( "md-off" ).addClass( "md-on" );
+                $("#map").css('cursor', 'crosshair');
+
+                map.on("click", getLayerFeatureInfo);
+                clickToolsActivate = true;            
+            } else {
+                $( element ).removeClass( "md-on" ).addClass( "md-off" );
+                $("#map").css('cursor', '');
+
+                map.off("click", getLayerFeatureInfo);
+                clickToolsActivate = false;
+            };
+            
+        // } else {
+        //     alert("The 'showCoordinates' tool is active, to use 'getFeatureInfo' disable it first!");
+        // }                           
+    }
+
+    /**
+     * add ShowCoordinates event to map
+     */
+    let addShowCoordinatesEventToMap = function (event) {
+        //if ( !clickToolsActivate ) {
+            let element = event.target;        
+            let hasClass = element.classList.contains( "md-off" );        
+            
+            if (hasClass) {
+                $( element ).removeClass( "md-off" ).addClass( "md-on" );
+                $("#map").css('cursor', 'crosshair');
+
+                map.on("click", showCoordinates);
+                clickToolsActivate = true;  
+            } else {
+                $( element ).removeClass( "md-on" ).addClass( "md-off" );
+                $("#map").css('cursor', '');
+
+                map.off("click", showCoordinates);
+                clickToolsActivate = false;  
+            };
+
+        // } else {
+        //     alert("The 'getFeatureInfo' tool is active, to use 'showCoordinates' disable it first!");
+        // }           
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // return
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1255,7 +1310,9 @@ var Terrabrasilis = (function(){
         activeLayer: activeLayer,
         setOpacityToLayer: setOpacityToLayer,
         moveLayerToBack: moveLayerToBack,
-        moveLayerToFront: moveLayerToFront
+        moveLayerToFront: moveLayerToFront,
+        addGetLayerFeatureInfoEventToMap: addGetLayerFeatureInfoEventToMap,
+        addShowCoordinatesEventToMap: addShowCoordinatesEventToMap
     }
      
 })(Terrabrasilis || {});
