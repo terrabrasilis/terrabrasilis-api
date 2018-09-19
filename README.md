@@ -10,12 +10,27 @@ npm install --save terrabrasilis-api
 
 ## Using the module
 
+```json
+let overlayers = [{
+     "title":"",
+     "name":"",
+     "host":"",
+     "legend_color":"",
+     "workspace":"",
+     "active":true,
+     "subdomains":null,
+     "baselayer":false,
+     "attribution":"",
+     "opacity": 0.9
+}]
+```
+
 #### In Node.js
 
 ```sh
 var Terrabrasilis = require('terrabrasilis-api');
 
-
+// just standard config
 Terrabrasilis
     .map() 
     .addBaseLayers()
@@ -24,7 +39,13 @@ Terrabrasilis
     .enableLayersControlTool()
     .enableScaleControlTool()
     .enableGeocodingTool();
-
+    
+// mount a simple map 
+Terrabrasilis
+     .map(lat, lon, zoom, 'div to mount the map') 
+     .addBaseLayers()
+     .addOverLayers(overlayers)
+     .hideStandardLayerControl(); // disable LayerControl
 ```
 
 ## Release History
@@ -39,4 +60,5 @@ Travis CI: [![Build Status](https://travis-ci.org/Terrabrasilis/terrabrasilis-ap
 * 0.0.6 release
 * 0.0.7 release 
 * 0.0.8 release 
-* 0.0.9 release [latest]
+* 0.0.9 release
+* 0.0.10 release [latest]
