@@ -47,6 +47,16 @@ Terrabrasilis
      .addOverLayers(overlayers)
      .hideStandardLayerControl(); // disable LayerControl
 ```
+// mount GeoJson layers (example)
+geojsonLayers = [{
+           "type":"point",     
+           "name":"cities",
+           "active": true,
+           "features":["all features points"]
+     }];
+Terrabrasilis
+    .map()
+    .addGeoJsonLayers(geojsonLayers);
 
 ## Release History
 
@@ -63,4 +73,5 @@ Travis CI: [![Build Status](https://travis-ci.org/Terrabrasilis/terrabrasilis-ap
 * 0.0.9 release
 * 0.0.10 release
 * 0.0.11 release
-* 0.0.12 release [latest]
+* 0.0.12 release
+* 0.0.13 release [latest]

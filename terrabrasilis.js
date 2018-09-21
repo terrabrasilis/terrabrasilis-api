@@ -427,6 +427,46 @@ var Terrabrasilis = (function(){
     }
 
     /**
+     * This method is used to mount geoJson overlayers to use in the terrabrasilis map     
+     * 
+     * [{
+     *      "type":"",     
+     *      "name":"",
+     *      "active": (true, false),
+     *      "features":[]
+     *  }]
+     */
+    let mountGeoJsonLayers = function(geoJson) {        
+        let overlayers = {};       
+
+        if(typeof(geoJson) == 'undefined' || geoJson === null) {
+            overlayers = null;
+            console.log("no objects defined to mount GeoJSON overlayers!")
+            return this;
+        }           
+                
+        for (const key in geoJson) {  
+            if (geoJson.hasOwnProperty(key)) {
+                const ol = geoJson[key];
+                
+                var overlayer = L.geoJson(ol.features);                
+                overlayers[ol.name] = overlayer;
+            }                
+        };              
+
+        for (const key in geoJson) {
+            if (geoJson.hasOwnProperty(key)) {
+                const toShow = geoJson[key];
+                if (toShow.active) {
+                    overlayers[toShow.name].addTo(map);
+                }                
+            }
+        }
+
+        return this;
+    }
+
+    /**
      * this method allow to use the draw tools
      */
     let enableDrawnFeature = function() {
@@ -1217,17 +1257,19 @@ var Terrabrasilis = (function(){
         let hasClass = element.classList.contains( "md-off" );        
         
         if (hasClass) {
-            $( element ).removeClass( "md-off" ).addClass( "md-on" );
+            //$( element ).removeClass( "md-off" ).addClass( "md-on" );
+            element.classList.remove("md-off");
+			element.classList.add("md-on");
             $("#map").css('cursor', 'crosshair');
 
-            map.on("click", getLayerFeatureInfo);
-            clickToolsActivate = true;            
+            map.on("click", getLayerFeatureInfo);            
         } else {
-            $( element ).removeClass( "md-on" ).addClass( "md-off" );
+            //$( element ).removeClass( "md-on" ).addClass( "md-off" );
+            element.classList.remove("md-on");
+			element.classList.add("md-off");
             $("#map").css('cursor', '');
 
-            map.off("click", getLayerFeatureInfo);
-            clickToolsActivate = false;
+            map.off("click", getLayerFeatureInfo);            
         };                         
     }
 
@@ -1239,17 +1281,19 @@ var Terrabrasilis = (function(){
         let hasClass = element.classList.contains( "md-off" );        
         
         if (hasClass) {
-            $( element ).removeClass( "md-off" ).addClass( "md-on" );
+            //$( element ).removeClass( "md-off" ).addClass( "md-on" );
+            element.classList.remove("md-off");
+			element.classList.add("md-on");
             $("#map").css('cursor', 'crosshair');
 
-            map.on("click", showCoordinates);
-            clickToolsActivate = true;  
+            map.on("click", showCoordinates);            
         } else {
-            $( element ).removeClass( "md-on" ).addClass( "md-off" );
+            //$( element ).removeClass( "md-on" ).addClass( "md-off" );
+            element.classList.remove("md-on");
+			element.classList.add("md-off");
             $("#map").css('cursor', '');
 
-            map.off("click", showCoordinates);
-            clickToolsActivate = false;  
+            map.off("click", showCoordinates);            
         };
     }
 
@@ -1270,6 +1314,7 @@ var Terrabrasilis = (function(){
         addOverLayers: mountOverLayers,
         addCustomizedBaseLayers: mountCustomizedBaseLayers,
         addCustomizedOverLayers: mountCustomizedOverLayers,
+        addGeoJsonLayers: mountGeoJsonLayers,
         enableDrawFeatureTool: enableDrawnFeature,
         enableLayersControlTool:  enableLayersControl,
         enableScaleControlTool:  enableScaleControl,
