@@ -46,7 +46,7 @@ Terrabrasilis
      .addBaseLayers()
      .addOverLayers(overlayers)
      .hideStandardLayerControl(); // disable LayerControl
-```
+
 // mount GeoJson layers (example)
 geojsonLayers = [{
            "type":"point",     
@@ -57,6 +57,8 @@ geojsonLayers = [{
 Terrabrasilis
     .map()
     .addGeoJsonLayers(geojsonLayers);
+
+```
 
 ## Release History
 
