@@ -9,8 +9,7 @@ var Terrabrasilis = (function(){
     /**
      * variables
      */
-    let map;
-    let clickToolsActivate = false;
+    let map;    
     let mapScaleStack;
     let redoScaleQueue;
     let baseLayersToShow;
@@ -22,11 +21,7 @@ var Terrabrasilis = (function(){
     let defaultZoom = 5;
     let defaultMapContainer = 'map';
     let constants = {
-        TERRABRASILIS_MAPS_GWC: "http://terrabrasilis.info/fip-service/gwc/service/wms",
-        TERRABRASILIS_MAPS_WMS: "http://terrabrasilis.info/fip-service/wms",
-        FIPCERRADO_OPERACAO: "http://fipcerrado.dpi.inpe.br:8080/fipcerrado-geoserver/wms",
-        FEATURE_INFO_PARAMS: "{0}/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&LAYERS={1}QUERY_LAYERS={2}&STYLES=BBOX={3}&FEATURE_COUNT=" +
-            "&WIDTH={4}&HEIGHT={5}&FORMAT=&INFO_FORMAT={6}&SRS=EPSG:4326&X={7}&Y={8}",
+        PROXY:"http://terrabrasilis.dpi.inpe.br/proxy?url="    
     };
     
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -752,8 +747,7 @@ var Terrabrasilis = (function(){
      * 
      * @param event 
      */
-    let getLayerFeatureInfo = function (event, showInPopup) {
-        let proxy_url = "http://terrabrasilis2.dpi.inpe.br:7000/cgi-bin/proxy.cgi?url="; 
+    let getLayerFeatureInfo = function (event, showInPopup) {        
         let urls = getFeatureInfoUrlJson(event);
 
         let table = "<div class=\"table-responsive\"><br/>"
@@ -768,7 +762,7 @@ var Terrabrasilis = (function(){
           .openOn(map);
 
         urls.forEach(url => {
-            let urlToGetInfo = proxy_url + encodeURIComponent(url);
+            let urlToGetInfo = constants.PROXY + encodeURIComponent(url);
             let tableBody = "";      
             $.ajax({
                 url: urlToGetInfo,
@@ -1218,55 +1212,45 @@ var Terrabrasilis = (function(){
     /**
      * add GetLayerFeatureInfo event to map
      */
-    let addGetLayerFeatureInfoEventToMap = function (event) {
-        //if ( !clickToolsActivate ) {
-            let element = event.target;        
-            let hasClass = element.classList.contains( "md-off" );        
-            
-            if (hasClass) {
-                $( element ).removeClass( "md-off" ).addClass( "md-on" );
-                $("#map").css('cursor', 'crosshair');
+    let addGetLayerFeatureInfoEventToMap = function (event) {        
+        let element = event.target;        
+        let hasClass = element.classList.contains( "md-off" );        
+        
+        if (hasClass) {
+            $( element ).removeClass( "md-off" ).addClass( "md-on" );
+            $("#map").css('cursor', 'crosshair');
 
-                map.on("click", getLayerFeatureInfo);
-                clickToolsActivate = true;            
-            } else {
-                $( element ).removeClass( "md-on" ).addClass( "md-off" );
-                $("#map").css('cursor', '');
+            map.on("click", getLayerFeatureInfo);
+            clickToolsActivate = true;            
+        } else {
+            $( element ).removeClass( "md-on" ).addClass( "md-off" );
+            $("#map").css('cursor', '');
 
-                map.off("click", getLayerFeatureInfo);
-                clickToolsActivate = false;
-            };
-            
-        // } else {
-        //     alert("The 'showCoordinates' tool is active, to use 'getFeatureInfo' disable it first!");
-        // }                           
+            map.off("click", getLayerFeatureInfo);
+            clickToolsActivate = false;
+        };                         
     }
 
     /**
      * add ShowCoordinates event to map
      */
-    let addShowCoordinatesEventToMap = function (event) {
-        //if ( !clickToolsActivate ) {
-            let element = event.target;        
-            let hasClass = element.classList.contains( "md-off" );        
-            
-            if (hasClass) {
-                $( element ).removeClass( "md-off" ).addClass( "md-on" );
-                $("#map").css('cursor', 'crosshair');
+    let addShowCoordinatesEventToMap = function (event) {        
+        let element = event.target;        
+        let hasClass = element.classList.contains( "md-off" );        
+        
+        if (hasClass) {
+            $( element ).removeClass( "md-off" ).addClass( "md-on" );
+            $("#map").css('cursor', 'crosshair');
 
-                map.on("click", showCoordinates);
-                clickToolsActivate = true;  
-            } else {
-                $( element ).removeClass( "md-on" ).addClass( "md-off" );
-                $("#map").css('cursor', '');
+            map.on("click", showCoordinates);
+            clickToolsActivate = true;  
+        } else {
+            $( element ).removeClass( "md-on" ).addClass( "md-off" );
+            $("#map").css('cursor', '');
 
-                map.off("click", showCoordinates);
-                clickToolsActivate = false;  
-            };
-
-        // } else {
-        //     alert("The 'getFeatureInfo' tool is active, to use 'showCoordinates' disable it first!");
-        // }           
+            map.off("click", showCoordinates);
+            clickToolsActivate = false;  
+        };
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
