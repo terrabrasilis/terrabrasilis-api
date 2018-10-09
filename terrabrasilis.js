@@ -1297,6 +1297,12 @@ var Terrabrasilis = (function(){
         };
     }
 
+    let resizeMap = function() {
+
+  	map.invalidateSize();
+
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // return
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1321,6 +1327,7 @@ var Terrabrasilis = (function(){
         enableGeocodingTool: enableGeocodingControl,
         enableLegendAndToolToLayers: enableLegendAndToolToLayers,
         hideStandardLayerControl: hideStandardLayerControl,
+	invalidateSize: resizeMap,
 
         /**
          * general tools
