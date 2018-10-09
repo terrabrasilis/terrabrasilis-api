@@ -1,6 +1,6 @@
 {
   "name": "terrabrasilis-api",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "API to build map and enable tools to use in Terrabrasilis webmap application",
   "main": "terrabrasilis.js",
   "scripts": {
