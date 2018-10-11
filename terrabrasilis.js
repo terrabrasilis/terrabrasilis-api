@@ -95,6 +95,14 @@ var Terrabrasilis = (function(){
         });
 
         resultsGetFeatureInfo = L.layerGroup().addTo(map);
+       
+        L.control.coordinates({
+            position:"bottomright",
+            decimals:6,
+            decimalSeperator:".",
+            labelTemplateLat:"Lat: {y}",
+            labelTemplateLng:"Lng: {x}"
+        }).addTo(map);
 
         return this;
     }
@@ -615,17 +623,17 @@ var Terrabrasilis = (function(){
             results.clearLayers();
             console.log(data);
             for (var i = data.results.length - 1; i >= 0; i--) {
-                results.addLayer(
-                    L.marker(data.results[i].latlng)
-                        .bindPopup('<strong>'+ data.results[i].properties.LongLabel +'</strong>'
-                                   + '<br>[ ' + data.results[i].latlng.lat + ' ][ ' + data.results[i].latlng.lng + ' ]')
-                );
+                let marker = L.marker(data.results[i].latlng)
+                                .bindPopup('<strong>'+ data.results[i].properties.LongLabel +'</strong>'
+                                    + '<br>[ ' + data.results[i].latlng.lat + ' ][ ' + data.results[i].latlng.lng + ' ]').openPopup();
+                
+                results.addLayer(marker);
             }
 
-            setTimeout(function(){ 
-                console.log("cleaning the search result layer");
-                results.clearLayers();
-            }, 10000);
+            // setTimeout(function(){ 
+            //     console.log("cleaning the search result layer");
+            //     results.clearLayers();
+            // }, 10000);
         });
 
         return this;
@@ -802,10 +810,14 @@ var Terrabrasilis = (function(){
         loading.attr('id', 'loading');
         divTable.append(loading);
 
-        let marker = L.marker(event.latlng).bindPopup(L.popup({ 
+        let initialPopup = L.popup({ 
             maxWidth: "auto",
             minWidth: 450
-        }).setContent(divTable[0].innerHTML)).openPopup();
+        }).setContent(divTable[0].innerHTML);
+        //.setLatLng(event.latlng) 
+        //.openOn(map);
+
+        let marker = L.marker(event.latlng).bindPopup(initialPopup, { autoClose: false }).openPopup();
         
         let popup = marker._popup;
 
@@ -871,6 +883,7 @@ var Terrabrasilis = (function(){
             return false;
         });
         
+        marker.fire('click');
         resultsGetFeatureInfo.addLayer(marker);        
     }
 
