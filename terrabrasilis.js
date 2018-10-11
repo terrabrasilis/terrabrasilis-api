@@ -96,14 +96,6 @@ var Terrabrasilis = (function(){
 
         resultsGetFeatureInfo = L.layerGroup().addTo(map);
        
-        L.control.coordinates({
-            position:"bottomright",
-            decimals:6,
-            decimalSeperator:".",
-            labelTemplateLat:"Lat: {y}",
-            labelTemplateLng:"Lng: {x}"
-        }).addTo(map);
-
         return this;
     }
 
@@ -608,6 +600,21 @@ var Terrabrasilis = (function(){
      */
     let enableScaleControl = function() {
         L.control.scale().addTo(map); 
+        return this;
+    }
+
+    /**
+     * Enable show coordinates
+     */
+    let enableDisplayMouseCoordinates = function() {
+        L.control.coordinates({
+            position:"bottomright",
+            decimals:6,
+            decimalSeperator:".",
+            labelTemplateLat:"Lat: {y}",
+            labelTemplateLng:"Lng: {x}"
+        }).addTo(map);
+        
         return this;
     }
 
@@ -1380,7 +1387,7 @@ var Terrabrasilis = (function(){
         enableGeocodingTool: enableGeocodingControl,
         enableLegendAndToolToLayers: enableLegendAndToolToLayers,
         hideStandardLayerControl: hideStandardLayerControl,
-	invalidateSize: resizeMap,
+	    enableInvalidateSize: resizeMap,
 
         /**
          * general tools
