@@ -614,7 +614,7 @@ var Terrabrasilis = (function(){
             labelTemplateLat:"Lat: {y}",
             labelTemplateLng:"Lng: {x}"
         }).addTo(map);
-        
+
         return this;
     }
 
@@ -1387,7 +1387,8 @@ var Terrabrasilis = (function(){
         enableGeocodingTool: enableGeocodingControl,
         enableLegendAndToolToLayers: enableLegendAndToolToLayers,
         hideStandardLayerControl: hideStandardLayerControl,
-	    enableInvalidateSize: resizeMap,
+        enableInvalidateSize: resizeMap,
+        enableDisplayMouseCoordinates: enableDisplayMouseCoordinates,
 
         /**
          * general tools
