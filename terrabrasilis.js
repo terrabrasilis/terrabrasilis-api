@@ -1299,7 +1299,7 @@ var Terrabrasilis = (function(){
 
     let resizeMap = function() {
 
-  	map.invalidateSize();
+  	    map.invalidateSize();
 
     }
 
