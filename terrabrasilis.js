@@ -23,6 +23,7 @@ var Terrabrasilis = (function(){
     let constants = {
         PROXY:"http://terrabrasilis.dpi.inpe.br/proxy?url="    
     };
+    let resultsGetFeatureInfo;
     
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Terrabrasilis map
@@ -93,6 +94,8 @@ var Terrabrasilis = (function(){
             console.log("add scale -> " + map.getZoom());
         });
 
+        resultsGetFeatureInfo = L.layerGroup().addTo(map);
+       
         return this;
     }
 
@@ -601,6 +604,21 @@ var Terrabrasilis = (function(){
     }
 
     /**
+     * Enable show coordinates
+     */
+    let enableDisplayMouseCoordinates = function() {
+        L.control.coordinates({
+            position:"bottomright",
+            decimals:6,
+            decimalSeperator:".",
+            labelTemplateLat:"Lat: {y}",
+            labelTemplateLng:"Lng: {x}"
+        }).addTo(map);
+
+        return this;
+    }
+
+    /**
      * this method enable search location using esri-leaflet plugin
      */
     let enableGeocodingControl = function () {
@@ -612,17 +630,17 @@ var Terrabrasilis = (function(){
             results.clearLayers();
             console.log(data);
             for (var i = data.results.length - 1; i >= 0; i--) {
-                results.addLayer(
-                    L.marker(data.results[i].latlng)
-                        .bindPopup('<strong>'+ data.results[i].properties.LongLabel +'</strong>'
-                                   + '<br>[ ' + data.results[i].latlng.lat + ' ][ ' + data.results[i].latlng.lng + ' ]')
-                );
+                let marker = L.marker(data.results[i].latlng)
+                                .bindPopup('<strong>'+ data.results[i].properties.LongLabel +'</strong>'
+                                    + '<br>[ ' + data.results[i].latlng.lat + ' ][ ' + data.results[i].latlng.lng + ' ]').openPopup();
+                
+                results.addLayer(marker);
             }
 
-            setTimeout(function(){ 
-                console.log("cleaning the search result layer");
-                results.clearLayers();
-            }, 10000);
+            // setTimeout(function(){ 
+            //     console.log("cleaning the search result layer");
+            //     results.clearLayers();
+            // }, 10000);
         });
 
         return this;
@@ -789,50 +807,91 @@ var Terrabrasilis = (function(){
      */
     let getLayerFeatureInfo = function (event, showInPopup) {        
         let urls = getFeatureInfoUrlJson(event);
+          
+        let divTable = $('<div/>');
+        divTable.addClass('table-responsive'); 
+        divTable.attr('id', 'getfeatureinfo');
+        
+        let loading = $('<div/>')
+        loading.addClass('lds-dual-ring');
+        loading.attr('id', 'loading');
+        divTable.append(loading);
 
-        let table = "<div class=\"table-responsive\"><br/>"
-            + "<table id=\"getfeatureinfo\" class=\"table table-striped\">"
-            + "<tbody></tbody></table></div>";
-
-        L.popup({ 
+        let initialPopup = L.popup({ 
             maxWidth: "auto",
             minWidth: 450
-        }).setLatLng(event.latlng)            
-          .setContent(table)
-          .openOn(map);
+        }).setContent(divTable[0].innerHTML);
+        //.setLatLng(event.latlng) 
+        //.openOn(map);
 
-        urls.forEach(url => {
-            let urlToGetInfo = constants.PROXY + encodeURIComponent(url);
-            let tableBody = "";      
-            $.ajax({
-                url: urlToGetInfo,
-                async: true,
-                success: function (data, status, xhr) {
-                    var err = typeof data === 'string' ? null : data;  
+        let marker = L.marker(event.latlng).bindPopup(initialPopup, { autoClose: false }).openPopup();
+        
+        let popup = marker._popup;
 
-                    data.features.forEach(element => {      
-                        /**
-                         * https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/Object/entries
-                         */                       
-                        tableBody += "<tr class=\"table-active\">"
-                                + "<td colspan=\"3\"><b>"+ (element.id.split(".")[0]).toUpperCase() +"</b></td>"
-                                + "</tr>";
-                        Object.entries(element.properties).forEach(([key, value]) => { 
-                            if (value != null) {
-                                tableBody += "<tr>"
-                                + "<td>" + key + "</td>"
-                                + "<td colspan=\"2\">" + value + "</td>"
-                                + "</tr>";
-                            }                                
+        marker.on('click', function(e) {    
+            divTable.html('');         
+            urls.forEach(url => {                
+                let urlToGetInfo = constants.PROXY + encodeURIComponent(url);            
+                
+                let table = $('<table/>')
+                table.addClass('table table-striped table-info');
+                let tableBody = $('<tbody/>');
+                table.append(tableBody);                      
+    
+                $.get(urlToGetInfo).done(function(data) {
+                    //console.log(data);
+                    $(popup._contentNode).html(divTable[0].innerHTML);
+                    if(data.features.length > 0) {
+                        data.features.forEach(element => {      
+                            /**
+                             * https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/Object/entries
+                             */                              
+                            if(Object.keys(element.properties).length > 0) {
+                                let rowTitle = $('<tr/>');
+                                rowTitle.addClass('table-active');
+                                let colTitle = $('<td/>')
+                                colTitle.attr('colspan', 3);
+                                colTitle.append("<b>" + (element.id.split(".")[0]).toUpperCase() + "</b>" );
+                                rowTitle.append(colTitle);
+                                table.append(rowTitle);
+            
+                                Object.entries(element.properties).forEach(([key, value]) => {                         
+                                    if (value != null) {
+                                        let row = $('<tr/>');
+                                        let colLeft = $('<td/>');
+                                        colLeft.append(key);
+                                        let colRight = $('<td/>');
+                                        colRight.attr('colspan', 2);
+                                        colRight.append(value);
+                                        row.append(colLeft);
+                                        row.append(colRight);
+                                        tableBody.append(row);
+                                    }                                
+                                });
+                            }                                                                                             
                         });                        
-                    }); 
-                    $("#getfeatureinfo").last().append(tableBody);
+                        divTable.append(table);  
+                    }
 
-                }, error: function (xhr, status, error) {
-                    console.log(error);
-                }
-            });
-        });   
+                    if(data.features.length < 0) {                        
+                        divTable.append('<p>No data to show!</p>');                        
+                    }
+
+                }).fail(function() {                    
+                    divTable.append('<p>The server is not responding the request!</p>');                   
+                }).always(function() {
+                    $(popup._contentNode).html('');
+                    loading.remove();
+                    $(popup._contentNode).html(divTable[0].innerHTML);    
+                    popup._updateLayout();
+                    popup._updatePosition();
+                }); 
+            });            
+            return false;
+        });
+        
+        marker.fire('click');
+        resultsGetFeatureInfo.addLayer(marker);        
     }
 
     /**
@@ -1260,7 +1319,7 @@ var Terrabrasilis = (function(){
             //$( element ).removeClass( "md-off" ).addClass( "md-on" );
             element.classList.remove("md-off");
 			element.classList.add("md-on");
-            $("#map").css('cursor', 'crosshair');
+            $("#map").css('cursor', 'pointer');
 
             map.on("click", getLayerFeatureInfo);            
         } else {
@@ -1269,7 +1328,8 @@ var Terrabrasilis = (function(){
 			element.classList.add("md-off");
             $("#map").css('cursor', '');
 
-            map.off("click", getLayerFeatureInfo);            
+            map.off("click", getLayerFeatureInfo);  
+            resultsGetFeatureInfo.clearLayers();          
         };                         
     }
 
@@ -1327,7 +1387,8 @@ var Terrabrasilis = (function(){
         enableGeocodingTool: enableGeocodingControl,
         enableLegendAndToolToLayers: enableLegendAndToolToLayers,
         hideStandardLayerControl: hideStandardLayerControl,
-	invalidateSize: resizeMap,
+        enableInvalidateSize: resizeMap,
+        enableDisplayMouseCoordinates: enableDisplayMouseCoordinates,
 
         /**
          * general tools
