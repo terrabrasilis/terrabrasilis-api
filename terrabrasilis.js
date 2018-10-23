@@ -437,6 +437,7 @@ var Terrabrasilis = (function(){
      * this method enables the features highlight
      */
     let geojsonHighlightFeature = function(e) {    
+        
         let layer = e.target;
     
         layer.setStyle({
@@ -458,10 +459,12 @@ var Terrabrasilis = (function(){
      */
     let geojsonResetHighlight = function(e) {
         var layer = e.target;
+        
         layer.setStyle({
             color: '',
             fillOpacity: 0.7
         });
+        
         info.update();
     }
     
@@ -476,6 +479,7 @@ var Terrabrasilis = (function(){
      * this method applies handlers on each features
      */
     let onEachFeature = function(feature, layer) {
+        
         layer.on({
             mouseover: geojsonHighlightFeature,
             mouseout: geojsonResetHighlight,
