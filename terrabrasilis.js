@@ -27,8 +27,10 @@ var Terrabrasilis = (function(){
 
     /* dashboard map */
     let info = L.control();
-    var legend = L.control({position: 'bottomright'});    
-    
+    let legend = L.control({position: 'bottomright'});        
+    let grades = [];
+    let colors = [];
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Terrabrasilis map
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -502,33 +504,57 @@ var Terrabrasilis = (function(){
         // updates a div info
         info.update = function (props) {
             this._div.innerHTML = '<h4>Deforestation</h4>' +  (props ?
-                '<b>' + props.name + '</b><br />' + props.density + ' km² </sup>': 'Hover over a feature');
+                '<b>' + props.name + '</b><br />' + props.density.toFixed(2) + ' km² </sup>': 'Hover over a feature');
         };
 
     }
 
-    function getColor(d) {
-        return d > 1000 ? '#800026' :
-               d > 500  ? '#BD0026' :
-               d > 200  ? '#E31A1C' :
-               d > 100  ? '#FC4E2A' :
-               d > 50   ? '#FD8D3C' :
-               d > 20   ? '#FEB24C' :
-               d > 10   ? '#FED976' :
-                          '#FFEDA0';
+    /** 
+    * this method sets grades values
+    */
+    let setGradesLegend = function(max, number) {        
+        // define initial settings
+        var delta = ~~(max/number);         
+        grades[0] = delta;
+        var j = 1;
+        for (i = delta; j <= number; i = i + delta) { // repeat number times
+            grades[j] = grades[j-1] + delta; // sum grades previous values
+            j = j + 1; // increment j
+        }
     }
 
+    /** 
+    * this method gets grades values
+    */
+    let getGradesLegend = function() {
+        return grades;
+    }
+
+    /** 
+    * this method set color legend
+    */
+    let setColorLegend = function(col) {
+        colors = col;
+    }
+
+    /** 
+    * this method gets color legends
+    */
+    let getColorLegend = function(elem) {
+        var index = grades.findIndex(function(number) {return number >= elem;});
+        return colors[index];
+    }
+
+    /** 
+    * add legend
+    */
     legend.onAdd = function (map) {
         
-        var div = L.DomUtil.create('div', 'info legend'),
-            grades = [0, 10, 20, 50, 100, 200, 500, 1000],
-            labels = [];
+        var div = L.DomUtil.create('div', 'info legend'); // create a div
     
-        // loop through our density intervals and generate a label with a colored square for each interval
+        // loop through grades intervals and generate a label with a colored square for each interval
         for (var i = 0; i < grades.length; i++) {
-            div.innerHTML +=
-                '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
-                grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+            div.innerHTML += '<i style="background:' + colors[i] + '"></i> ' + grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
         }
     
         return div;
@@ -545,7 +571,7 @@ var Terrabrasilis = (function(){
      *      "features":[]
      *  }]
      */
-    let mountGeoJsonLayers = function(geoJson) {        
+    let mountGeoJsonLayers = function(geoJson) {
         let overlayers = {};       
 
         if(typeof(geoJson) == 'undefined' || geoJson === null) {
@@ -1512,6 +1538,10 @@ var Terrabrasilis = (function(){
         enableInvalidateSize: resizeMap,
         disableMap: removeMap,
         hasDefinedMap: checkMap,
+        setLegend: setGradesLegend,
+        getLegend: getGradesLegend,
+        setColor: setColorLegend,
+        getColor: getColorLegend,
         enableDisplayMouseCoordinates: enableDisplayMouseCoordinates,
 
         /**
