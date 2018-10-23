@@ -9,7 +9,7 @@ var Terrabrasilis = (function(){
     /**
      * variables
      */
-    let map;    
+    let map;        
     let mapScaleStack;
     let redoScaleQueue;
     let baseLayersToShow;
@@ -24,6 +24,10 @@ var Terrabrasilis = (function(){
         PROXY:"http://terrabrasilis.dpi.inpe.br/proxy?url="    
     };
     let resultsGetFeatureInfo;
+
+    /* dashboard map */
+    let info = L.control();
+    var legend = L.control({position: 'bottomright'});    
     
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Terrabrasilis map
@@ -430,12 +434,110 @@ var Terrabrasilis = (function(){
     }
 
     /**
+     * this method enables the features highlight
+     */
+    let geojsonHighlightFeature = function(e) {    
+        let layer = e.target;
+    
+        layer.setStyle({
+            weight: 5,
+            color: '#666',
+            dashArray: '',
+            fillOpacity: 0.7
+        });
+    
+        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+            layer.bringToFront();
+        }
+        
+        info.update(layer.feature.properties);
+    }
+
+    /**
+     * this method resets to features highlight
+     */
+    let geojsonResetHighlight = function(e) {
+        var layer = e.target;
+        layer.setStyle({
+            color: '',
+            fillOpacity: 0.7
+        });
+        info.update();
+    }
+    
+    /**
+     * this method zooms to feature
+     */
+    let geojsonZoomToFeature = function(e) {     
+        map.fitBounds(e.target.getBounds());
+    }
+    
+    /**
+     * this method applies handlers on each features
+     */
+    let onEachFeature = function(feature, layer) {
+        layer.on({
+            mouseover: geojsonHighlightFeature,
+            mouseout: geojsonResetHighlight,
+            click: geojsonZoomToFeature
+        });
+    }    
+
+    /**
+     * this method builds info
+     */
+    let buildInfo = function() {
+
+        // creates an info div 
+        info.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+            this.update();
+            return this._div;
+        };
+        
+        // updates a div info
+        info.update = function (props) {
+            this._div.innerHTML = '<h4>Deforestation</h4>' +  (props ?
+                '<b>' + props.name + '</b><br />' + props.density + ' km² </sup>': 'Hover over a state');
+        };
+
+    }
+
+    function getColor(d) {
+        return d > 1000 ? '#800026' :
+               d > 500  ? '#BD0026' :
+               d > 200  ? '#E31A1C' :
+               d > 100  ? '#FC4E2A' :
+               d > 50   ? '#FD8D3C' :
+               d > 20   ? '#FEB24C' :
+               d > 10   ? '#FED976' :
+                          '#FFEDA0';
+    }
+
+    legend.onAdd = function (map) {
+        
+        var div = L.DomUtil.create('div', 'info legend'),
+            grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+            labels = [];
+    
+        // loop through our density intervals and generate a label with a colored square for each interval
+        for (var i = 0; i < grades.length; i++) {
+            div.innerHTML +=
+                '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+                grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+        }
+    
+        return div;
+    };
+    
+    /**
      * This method is used to mount geoJson overlayers to use in the terrabrasilis map     
      * 
      * [{
      *      "type":"",     
      *      "name":"",
      *      "active": (true, false),
+     *      "style":"",
      *      "features":[]
      *  }]
      */
@@ -452,7 +554,9 @@ var Terrabrasilis = (function(){
             if (geoJson.hasOwnProperty(key)) {
                 const ol = geoJson[key];
                 
-                var overlayer = L.geoJson(ol.features);                
+                var overlayer = L.geoJson(ol.features, 
+                                         {style: ol.style,
+                                          onEachFeature: onEachFeature});
                 overlayers[ol.name] = overlayer;
             }                
         };              
@@ -462,6 +566,9 @@ var Terrabrasilis = (function(){
                 const toShow = geoJson[key];
                 if (toShow.active) {
                     overlayers[toShow.name].addTo(map);
+                    buildInfo();
+                    info.addTo(map);
+                    legend.addTo(map);
                 }                
             }
         }
