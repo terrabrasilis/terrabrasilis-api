@@ -95,7 +95,7 @@ var Terrabrasilis = (function(){
             mapScaleStack.insert(options);
             redoScaleQueue.insert(options);
             
-            console.log("add scale -> " + map.getZoom());
+            //console.log("add scale -> " + map.getZoom());
         });
 
         resultsGetFeatureInfo = L.layerGroup().addTo(map);
@@ -131,7 +131,7 @@ var Terrabrasilis = (function(){
         var baselayers = {};
         
         if(typeof(baseLayersOptions) == 'undefined' || baseLayersOptions === null) {
-            console.log("no objects defined to mount baselayers so using the OSM baselayer to up the app!")
+            //console.log("no objects defined to mount baselayers so using the OSM baselayer to up the app!")
             baselayers = {
                 "OSM Default": L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
                                     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -209,7 +209,7 @@ var Terrabrasilis = (function(){
         var baselayers = {};
         
         if(typeof(baseLayersOptions) == 'undefined' || baseLayersOptions === null) {
-            console.log("no objects defined to mount baselayers so using the OSM baselayer to up the app!")
+            //console.log("no objects defined to mount baselayers so using the OSM baselayer to up the app!")
             baselayers = {
                 "OSM Default": L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
                                     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -297,7 +297,7 @@ var Terrabrasilis = (function(){
 
         if(typeof(overLayersOptions) == 'undefined' || overLayersOptions === null) {
             overlayers = null;
-            console.log("no objects defined to mount overlayers!")
+            //console.log("no objects defined to mount overlayers!")
             return this;
         }           
         
@@ -385,7 +385,7 @@ var Terrabrasilis = (function(){
 
         if(typeof(overLayersOptions) == 'undefined' || overLayersOptions === null) {
             overlayers = null;
-            console.log("no objects defined to mount overlayers!")
+            //console.log("no objects defined to mount overlayers!")
             return this;
         }           
         
@@ -502,7 +502,7 @@ var Terrabrasilis = (function(){
         // updates a div info
         info.update = function (props) {
             this._div.innerHTML = '<h4>Deforestation</h4>' +  (props ?
-                '<b>' + props.name + '</b><br />' + props.density + ' km² </sup>': 'Hover over a state');
+                '<b>' + props.name + '</b><br />' + props.density + ' km² </sup>': 'Hover over a feature');
         };
 
     }
@@ -550,7 +550,7 @@ var Terrabrasilis = (function(){
 
         if(typeof(geoJson) == 'undefined' || geoJson === null) {
             overlayers = null;
-            console.log("no objects defined to mount GeoJSON overlayers!")
+            //console.log("no objects defined to mount GeoJSON overlayers!")
             return this;
         }           
                 
@@ -568,7 +568,7 @@ var Terrabrasilis = (function(){
         for (const key in geoJson) {
             if (geoJson.hasOwnProperty(key)) {
                 const toShow = geoJson[key];
-                if (toShow.active) {
+                if (toShow.active) {                    
                     overlayers[toShow.name].addTo(map);
                     buildInfo();
                     info.addTo(map);
@@ -658,7 +658,7 @@ var Terrabrasilis = (function(){
             const editedLayers = event.layers;
             editedLayers.eachLayer(function(l) {
                 let wkt = getTerraformerWKT(l);                                              
-                console.log(wkt);
+                //console.log(wkt);
             });
         });
 
@@ -667,7 +667,7 @@ var Terrabrasilis = (function(){
             
             deletedLayers.eachLayer(function(l) {                
                 drawnItems.removeLayer(l);
-                console.log("Deleting feature: ", l);
+                //console.log("Deleting feature: ", l);
             });
         });
 
@@ -739,7 +739,7 @@ var Terrabrasilis = (function(){
 
         searchControl.on('results', function(data){
             results.clearLayers();
-            console.log(data);
+            //console.log(data);
             for (var i = data.results.length - 1; i >= 0; i--) {
                 let marker = L.marker(data.results[i].latlng)
                                 .bindPopup('<strong>'+ data.results[i].properties.LongLabel +'</strong>'
@@ -772,7 +772,7 @@ var Terrabrasilis = (function(){
 
         mapScaleStack.reset();
         redoScaleQueue.reset();
-        console.log("Reset stack and queue.");
+        //console.log("Reset stack and queue.");
     } 
     
     /**
@@ -878,8 +878,8 @@ var Terrabrasilis = (function(){
      */
     let undo = function () {
         let letsGoTo = mapScaleStack.remove();
-        console.log("undo to -> ");
-        console.log(letsGoTo)
+        //console.log("undo to -> ");
+        //console.log(letsGoTo)
             
         if(letsGoTo !== 'undefined') {
             if(letsGoTo.zoom === map.getZoom())
@@ -898,8 +898,8 @@ var Terrabrasilis = (function(){
      */
     let redo = function () {
         let letsGoTo = redoScaleQueue.remove();
-        console.log("redo to -> ");
-        console.log(letsGoTo)
+        //console.log("redo to -> ");
+        //console.log(letsGoTo)
             
         if(letsGoTo !== 'undefined') {
             if(letsGoTo.zoom === map.getZoom())
@@ -1105,7 +1105,7 @@ var Terrabrasilis = (function(){
      * @param {*} content 
      */
     let showGetFeatureInfo = function (err, latlng, content) {
-        if (err) { console.log(err); return; } 
+        if (err) { /*console.log(err);*/ return; } 
 
         L.popup({ maxWidth:500 })
            .setLatLng(latlng)
@@ -1121,7 +1121,7 @@ var Terrabrasilis = (function(){
      */
     let getLayerByName = function(layerName) {
         if(typeof(layerName) == 'undefined' || layerName === null) {            
-            console.log("layerName must not be null!");
+            //console.log("layerName must not be null!");
             return this;
         } 
 
@@ -1146,7 +1146,7 @@ var Terrabrasilis = (function(){
      */
     let isLayerActived = function(layer) {
         if(typeof(layer) == 'undefined' || layer === null) {            
-            console.log("layer must not be null!");
+            //console.log("layer must not be null!");
             return this;
         } 
         return map.hasLayer(layer);
@@ -1159,7 +1159,7 @@ var Terrabrasilis = (function(){
      */
     let deactiveLayer = function(layer) {
         if(typeof(layer) == 'undefined' || layer === null) {            
-            console.log("layer must not be null!");
+            //console.log("layer must not be null!");
             return this;
         }
         map.removeLayer(layer);
@@ -1172,7 +1172,7 @@ var Terrabrasilis = (function(){
      */
     let activeLayer = function(layer) {
         if(typeof(layer) == 'undefined' || layer === null) {            
-            console.log("layer must not be null!");
+            //console.log("layer must not be null!");
             return this;
         }
         let layers = new Array();
@@ -1191,7 +1191,7 @@ var Terrabrasilis = (function(){
      */
     let setOpacityToLayer = function(layer, value) {
         if(typeof(layer) == 'undefined' || layer === null) {            
-            console.log("layer must not be null!");
+            //console.log("layer must not be null!");
             return this;
         }
         layer.setOpacity(value);
@@ -1226,7 +1226,7 @@ var Terrabrasilis = (function(){
             const element = layersOnMap[index];
             if(!(element._leaflet_id === layerId)) {
                 if(layer.options.zIndex < element.options.zIndex) {
-                    console.log("moveLayerToFront from [ " + layer.options._name + " ] to [ " + element.options._name + " ]");
+                    //console.log("moveLayerToFront from [ " + layer.options._name + " ] to [ " + element.options._name + " ]");
                 
                     let elementZIndex = element.options.zIndex;
                     let layerZIndex = layer.options.zIndex;
@@ -1264,7 +1264,7 @@ var Terrabrasilis = (function(){
             const element = layersOnMap[index];
             if(!(element._leaflet_id === layerId)) {
                 if(layer.options.zIndex > element.options.zIndex) {
-                    console.log("moveLayerToBack [ " + layer.options._name + " ] to [ " + element.options._name + " ]");
+                    //console.log("moveLayerToBack [ " + layer.options._name + " ] to [ " + element.options._name + " ]");
                 
                     let elementZIndex = element.options.zIndex;
                     let layerZIndex = layer.options.zIndex;
@@ -1287,7 +1287,7 @@ var Terrabrasilis = (function(){
     let getIdentifyLayers = function () {
         let result = [];
         map.eachLayer(layer => {        
-            console.log(layer);
+            //console.log(layer);
             if(layer.options._name) {
                 result.push(layer);
             }
@@ -1303,7 +1303,7 @@ var Terrabrasilis = (function(){
         let result = [];
         
         map.eachLayer(layer => {        
-            console.log(layer);
+            //console.log(layer);
             //console.log(layer.options);            
             if (layer.options.hasOwnProperty("_baselayer")) {
                 if(!layer.options._baselayer) {
@@ -1474,6 +1474,17 @@ var Terrabrasilis = (function(){
 
     }
 
+    let checkMap = function() {
+
+        return !(map == undefined || map == null);
+    }
+
+    let removeMap = function() {
+
+        map.remove();
+
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // return
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1499,6 +1510,8 @@ var Terrabrasilis = (function(){
         enableLegendAndToolToLayers: enableLegendAndToolToLayers,
         hideStandardLayerControl: hideStandardLayerControl,
         enableInvalidateSize: resizeMap,
+        disableMap: removeMap,
+        hasDefinedMap: checkMap,
         enableDisplayMouseCoordinates: enableDisplayMouseCoordinates,
 
         /**
