@@ -504,8 +504,7 @@ var Terrabrasilis = (function(){
         
         // updates a div info
         info.update = function (props) {
-            this._div.innerHTML = '<h4>Deforestation</h4>' +  (props ?
-                '<b>' + props.name + '</b><br />' + props.density.toFixed(2) + ' km² </sup>': 'Hover over a feature');
+            this._div.innerHTML = (props ? '<b>' + props.name + '</b><br />' + props.density.toFixed(2) + ' </sup>': 'Hover over a feature');
         };
 
     }
