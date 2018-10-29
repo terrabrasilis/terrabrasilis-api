@@ -487,7 +487,8 @@ var Terrabrasilis = (function(){
             mouseout: geojsonResetHighlight,
             click: geojsonZoomToFeature
         });
-    }    
+        
+    }
 
     /**
      * this method builds info
