@@ -1454,20 +1454,38 @@ var Terrabrasilis = (function(){
      * add GetLayerFeatureInfo event to map
      */
     let addGetLayerFeatureInfoEventToMap = function (event) {        
+        /**
+         * work with the specific element actived
+         */
         let element = event.target;        
-        let hasClass = element.classList.contains( "md-off" );        
-        
-        if (hasClass) {
-            //$( element ).removeClass( "md-off" ).addClass( "md-on" );
-            element.classList.remove("md-off");
-			element.classList.add("md-on");
-            $("#map").css('cursor', 'pointer');
+        let hasClass = element.classList.contains( "md-off" ); 
+        if (hasClass) {            
+            /**
+             * disable the coordinates tool
+             */
+            $(".to-manipulate").each(function(idx) {
+                let element = this;                     
+                element.classList.remove("md-on");
+                element.classList.add("md-off");
+            });
+            map.off("click", showCoordinates);
+            $("#map").css('cursor', '');
 
-            map.on("click", getLayerFeatureInfo);            
+            /**
+             * enable the feature info tool
+             */
+            element.classList.remove("md-off");
+			element.classList.add("md-on");             
+            $("#map").addClass("cursor-feature-info"); // this class was located in: style.css file
+            map.on("click", getLayerFeatureInfo);              
+
         } else {
-            //$( element ).removeClass( "md-on" ).addClass( "md-off" );
-            element.classList.remove("md-on");
-			element.classList.add("md-off");
+            $(".to-manipulate").each(function(idx) {
+                let element = this;                     
+                element.classList.remove("md-on");
+                element.classList.add("md-off");
+            });
+            $("#map").removeClass("cursor-feature-info");
             $("#map").css('cursor', '');
 
             map.off("click", getLayerFeatureInfo);  
@@ -1478,24 +1496,41 @@ var Terrabrasilis = (function(){
     /**
      * add ShowCoordinates event to map
      */
-    let addShowCoordinatesEventToMap = function (event) {        
+    let addShowCoordinatesEventToMap = function (event) { 
+        /**
+         * work with the specific element actived
+         */       
         let element = event.target;        
-        let hasClass = element.classList.contains( "md-off" );        
-        
+        let hasClass = element.classList.contains( "md-off" );   
         if (hasClass) {
-            //$( element ).removeClass( "md-off" ).addClass( "md-on" );
+            /**
+             * disable the coordinates tool
+             */
+            $(".to-manipulate").each(function(idx) {
+                let element = this;
+                element.classList.remove("md-on");
+                element.classList.add("md-off");
+            });
+            resultsGetFeatureInfo.clearLayers();
+            map.off("click", getLayerFeatureInfo); 
+
+            /**
+             * enable the coordinates tool
+             */
             element.classList.remove("md-off");
 			element.classList.add("md-on");
             $("#map").css('cursor', 'crosshair');
-
-            map.on("click", showCoordinates);            
+            map.on("click", showCoordinates);                        
         } else {
-            //$( element ).removeClass( "md-on" ).addClass( "md-off" );
-            element.classList.remove("md-on");
-			element.classList.add("md-off");
+            $(".to-manipulate").each(function(idx) {
+                let element = this;                     
+                element.classList.remove("md-on");
+                element.classList.add("md-off");
+            });
             $("#map").css('cursor', '');
 
-            map.off("click", showCoordinates);            
+            map.off("click", showCoordinates); 
+            resultsGetFeatureInfo.clearLayers();           
         };
     }
 
