@@ -504,7 +504,7 @@ var Terrabrasilis = (function(){
         
         // updates a div info
         info.update = function (props) {
-            this._div.innerHTML = (props ? '<b>' + props.name + '</b><br />' + props.density.toFixed(2) + ' </sup>': 'Hover over a feature');
+            this._div.innerHTML = (props ? '<b>' + props.name + '</b><br/>' + props.density.toFixed(2): 'Hover over a feature');
         };
 
     }
@@ -515,12 +515,10 @@ var Terrabrasilis = (function(){
     let setGradesLegend = function(max, number) {        
         // define initial settings
         var delta = ~~(max/number);         
-        grades[0] = delta;
-        var j = 1;
-        for (i = delta; j <= number; i = i + delta) { // repeat number times
+        grades[0] = 0;
+        for (var j = 1;  j <= number; j++) { // repeat number times
             grades[j] = grades[j-1] + delta; // sum grades previous values
-            j = j + 1; // increment j
-        }
+        }        
     }
 
     /** 
@@ -540,8 +538,15 @@ var Terrabrasilis = (function(){
     /** 
     * this method gets color legends
     */
-    let getColorLegend = function(elem) {
-        var index = grades.findIndex(function(number) {return number >= elem;});
+    let getColorLegend = function(elem) {  
+        
+        var index;
+        for(var i = grades.length-1; i >= 0; i--){
+            if(elem >= grades[i]){
+              index = i;
+              break;
+            }
+        }
         return colors[index];
     }
 
