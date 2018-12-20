@@ -436,6 +436,26 @@ var Terrabrasilis = (function(){
     }
 
     /**
+     * Reorders the list layers inside the map to change the layers stacking order on the viewer.
+     * Expect the stackOrder numeric parameter for each layer to define the zIndex for each layer inside the map.
+     * @param {*} layers One list of layers from external application.
+     */
+    let reorderOverLayers = function(layers) {
+        // use this offset because it is defined into mountCustomizedOverLayers method. TODO: change this in future version
+        let zindexOffSet=200;
+        map.eachLayer(layer => {
+            
+            let oLayer=layers.find(l => {
+                if(l.name===layer.options._name) return l;
+            });
+            // set zindex into layer of the map reading stackOrder property from the external Layer definition
+            if(oLayer){
+                layer.setZIndex(zindexOffSet - oLayer.stackOrder);
+            }
+        });
+    }
+
+    /**
      * this method enables the features highlight
      */
     let geojsonHighlightFeature = function(e) {    
@@ -1568,6 +1588,7 @@ var Terrabrasilis = (function(){
         addOverLayers: mountOverLayers,
         addCustomizedBaseLayers: mountCustomizedBaseLayers,
         addCustomizedOverLayers: mountCustomizedOverLayers,
+        reorderOverLayers: reorderOverLayers,
         addGeoJsonLayers: mountGeoJsonLayers,
         enableDrawFeatureTool: enableDrawnFeature,
         enableLayersControlTool:  enableLayersControl,
