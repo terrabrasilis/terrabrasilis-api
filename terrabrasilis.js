@@ -243,7 +243,7 @@ var Terrabrasilis = (function(){
                     }
                     //console.log(options);
                     var baselayer = L.tileLayer(bl.host, options);
-                    baselayer.setZIndex(0);                
+                    baselayer.setZIndex(0);
                     baselayers[bl.title] = baselayer;
                 }
             }                      
@@ -370,19 +370,28 @@ var Terrabrasilis = (function(){
      * This method is used to mount all overlayers to use in the terrabrasilis map     
      * 
      * [{
-     *      "title":"",     
-     *      "name":"",
-     *      "host":"",
-     *      "legend_color":"",
-     *      "workspace":"",
-     *      "active":false,
-     *      "subdomain":[],
-     *      "baselayer":false,
-     *      "attribution": null,
-     *      "opacity": value
+     *      "title":string,     
+     *      "name":string,
+     *      "host":string,
+     *      "legend_color":string,
+     *      "workspace": string,
+     *      "active":boolean,
+     *      "subdomains":[],
+     *      "baselayer":boolean,
+     *      "attribution": string,
+     *      "opacity": number,
+     *      download: string,
+     *      metadata: string,
+     *      dashboard: string,
+     *      source: string,
+     *      stackOrder: number
      *  }]
+     * 
+     * About the stackOrder parameter:
+     * To control the display order of layers into map use bigger values to putting the layer over the others and the minor values to put below.
+     * 
      */
-    let mountCustomizedOverLayers = function(overLayersOptions) {        
+    let mountCustomizedOverLayers = function(overLayersOptions) {
         let overlayers = {};       
 
         if(typeof(overLayersOptions) == 'undefined' || overLayersOptions === null) {
@@ -391,8 +400,7 @@ var Terrabrasilis = (function(){
             return this;
         }           
         
-        let zIndexCount = 199;
-        for (const key in overLayersOptions) {  
+        for (const key in overLayersOptions) {
             if (overLayersOptions.hasOwnProperty(key)) {
                 const ol = overLayersOptions[key];
                 //console.log(ol);
@@ -403,7 +411,7 @@ var Terrabrasilis = (function(){
                         transparent: true,
                         _name: ol.name,
                         _baselayer: ol.baselayer,
-                        zIndex: zIndexCount++
+                        zIndex: ol.stackOrder
                     }
                     if (ol.subdomains != null) {
                         if (ol.subdomains.length > 0) {
@@ -441,8 +449,6 @@ var Terrabrasilis = (function(){
      * @param {*} layers One list of layers from external application.
      */
     let reorderOverLayers = function(layers) {
-        // use this offset because it is defined into mountCustomizedOverLayers method. TODO: change this in future version
-        let zindexOffSet=200;
         map.eachLayer(layer => {
             
             let oLayer=layers.find(l => {
@@ -450,7 +456,7 @@ var Terrabrasilis = (function(){
             });
             // set zindex into layer of the map reading stackOrder property from the external Layer definition
             if(oLayer){
-                layer.setZIndex(zindexOffSet - oLayer.stackOrder);
+                layer.setZIndex(oLayer.stackOrder);
             }
         });
     }
@@ -1217,9 +1223,9 @@ var Terrabrasilis = (function(){
     }
 
     /**
-     * This layer add layer to the map
+     * This method add one layer to the map.
      * 
-     * @param {*} layer 
+     * @param {*} layer The parameters to instantiate the Leaflet layer and add into map.
      */
     let activeLayer = function(layer) {
         if(typeof(layer) == 'undefined' || layer === null) {            
@@ -1310,7 +1316,7 @@ var Terrabrasilis = (function(){
         }             
         //console.log(layersOnMap);
         
-        let layerId = layer._leaflet_id
+        let layerId = layer._leaflet_id;
         for (let index = 0; index < layersOnMap.length; index++) {
             const element = layersOnMap[index];
             if(!(element._leaflet_id === layerId)) {
