@@ -1508,6 +1508,7 @@ var Terrabrasilis = (function(){
             });
             resultsGetFeatureInfo.clearLayers();
             map.off("click", getLayerFeatureInfo); 
+            $("#map").css('cursor', '');
 
             /**
              * enable the coordinates tool
