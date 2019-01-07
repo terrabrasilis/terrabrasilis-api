@@ -243,7 +243,7 @@ var Terrabrasilis = (function(){
                     }
                     //console.log(options);
                     var baselayer = L.tileLayer(bl.host, options);
-                    baselayer.setZIndex(0);                
+                    baselayer.setZIndex(0);
                     baselayers[bl.title] = baselayer;
                 }
             }                      
@@ -370,19 +370,28 @@ var Terrabrasilis = (function(){
      * This method is used to mount all overlayers to use in the terrabrasilis map     
      * 
      * [{
-     *      "title":"",     
-     *      "name":"",
-     *      "host":"",
-     *      "legend_color":"",
-     *      "workspace":"",
-     *      "active":false,
-     *      "subdomain":[],
-     *      "baselayer":false,
-     *      "attribution": null,
-     *      "opacity": value
+     *      "title":string,     
+     *      "name":string,
+     *      "host":string,
+     *      "legend_color":string,
+     *      "workspace": string,
+     *      "active":boolean,
+     *      "subdomains":[],
+     *      "baselayer":boolean,
+     *      "attribution": string,
+     *      "opacity": number,
+     *      download: string,
+     *      metadata: string,
+     *      dashboard: string,
+     *      source: string,
+     *      stackOrder: number
      *  }]
+     * 
+     * About the stackOrder parameter:
+     * To control the display order of layers into map use bigger values to putting the layer over the others and the minor values to put below.
+     * 
      */
-    let mountCustomizedOverLayers = function(overLayersOptions) {        
+    let mountCustomizedOverLayers = function(overLayersOptions) {
         let overlayers = {};       
 
         if(typeof(overLayersOptions) == 'undefined' || overLayersOptions === null) {
@@ -391,8 +400,7 @@ var Terrabrasilis = (function(){
             return this;
         }           
         
-        let zIndexCount = 199;
-        for (const key in overLayersOptions) {  
+        for (const key in overLayersOptions) {
             if (overLayersOptions.hasOwnProperty(key)) {
                 const ol = overLayersOptions[key];
                 //console.log(ol);
@@ -403,7 +411,7 @@ var Terrabrasilis = (function(){
                         transparent: true,
                         _name: ol.name,
                         _baselayer: ol.baselayer,
-                        zIndex: zIndexCount++
+                        zIndex: ol.stackOrder
                     }
                     if (ol.subdomains != null) {
                         if (ol.subdomains.length > 0) {
@@ -433,6 +441,24 @@ var Terrabrasilis = (function(){
         }
 
         return this;
+    }
+
+    /**
+     * Reorders the list layers inside the map to change the layers stacking order on the viewer.
+     * Expect the stackOrder numeric parameter for each layer to define the zIndex for each layer inside the map.
+     * @param {*} layers One list of layers from external application.
+     */
+    let reorderOverLayers = function(layers) {
+        map.eachLayer(layer => {
+            
+            let oLayer=layers.find(l => {
+                if(l.name===layer.options._name) return l;
+            });
+            // set zindex into layer of the map reading stackOrder property from the external Layer definition
+            if(oLayer){
+                layer.setZIndex(oLayer.stackOrder);
+            }
+        });
     }
 
     /**
@@ -504,7 +530,7 @@ var Terrabrasilis = (function(){
         
         // updates a div info
         info.update = function (props) {
-            this._div.innerHTML = (props ? '<b>' + props.name + '</b><br />' + props.density.toFixed(2) + ' </sup>': 'Hover over a feature');
+            this._div.innerHTML = (props ? '<b>' + props.name + '</b><br/>' + props.density.toFixed(2): 'Hover over a feature');
         };
 
     }
@@ -515,12 +541,10 @@ var Terrabrasilis = (function(){
     let setGradesLegend = function(max, number) {        
         // define initial settings
         var delta = ~~(max/number);         
-        grades[0] = delta;
-        var j = 1;
-        for (i = delta; j <= number; i = i + delta) { // repeat number times
+        grades[0] = 0;
+        for (var j = 1;  j <= number; j++) { // repeat number times
             grades[j] = grades[j-1] + delta; // sum grades previous values
-            j = j + 1; // increment j
-        }
+        }        
     }
 
     /** 
@@ -540,8 +564,15 @@ var Terrabrasilis = (function(){
     /** 
     * this method gets color legends
     */
-    let getColorLegend = function(elem) {
-        var index = grades.findIndex(function(number) {return number >= elem;});
+    let getColorLegend = function(elem) {  
+        
+        var index;
+        for(var i = grades.length-1; i >= 0; i--){
+            if(elem >= grades[i]){
+              index = i;
+              break;
+            }
+        }
         return colors[index];
     }
 
@@ -1192,9 +1223,9 @@ var Terrabrasilis = (function(){
     }
 
     /**
-     * This layer add layer to the map
+     * This method add one layer to the map.
      * 
-     * @param {*} layer 
+     * @param {*} layer The parameters to instantiate the Leaflet layer and add into map.
      */
     let activeLayer = function(layer) {
         if(typeof(layer) == 'undefined' || layer === null) {            
@@ -1285,7 +1316,7 @@ var Terrabrasilis = (function(){
         }             
         //console.log(layersOnMap);
         
-        let layerId = layer._leaflet_id
+        let layerId = layer._leaflet_id;
         for (let index = 0; index < layersOnMap.length; index++) {
             const element = layersOnMap[index];
             if(!(element._leaflet_id === layerId)) {
@@ -1564,6 +1595,7 @@ var Terrabrasilis = (function(){
         addOverLayers: mountOverLayers,
         addCustomizedBaseLayers: mountCustomizedBaseLayers,
         addCustomizedOverLayers: mountCustomizedOverLayers,
+        reorderOverLayers: reorderOverLayers,
         addGeoJsonLayers: mountGeoJsonLayers,
         enableDrawFeatureTool: enableDrawnFeature,
         enableLayersControlTool:  enableLayersControl,
