@@ -313,6 +313,7 @@ var Terrabrasilis = (function(){
                         layers: ol.workspace + ":" + ol.name,
                         format: 'image/png',
                         transparent: true,
+			tiled: true,
                         _name: ol.name,
                         _baselayer: ol.baselayer,
                         zIndex: zIndexCount++
@@ -409,6 +410,7 @@ var Terrabrasilis = (function(){
                         layers: ol.workspace + ":" + ol.name,
                         format: 'image/png',
                         transparent: true,
+			tiled: true,
                         _name: ol.name,
                         _baselayer: ol.baselayer,
                         zIndex: ol.stackOrder
