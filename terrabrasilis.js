@@ -105,25 +105,61 @@ var Terrabrasilis = (function(){
         return this;
     }
 
+   
     /**
-     * This method is used to mount all base layers to use in the terrabrasilis map   
-     * 
-     *  [{
-     *      "name":"",
-     *      "host":"",
-     *      "legend_color":null,
-     *      "workspace":"",
-     *      "active":false,
-     *      "subdomains":[
-     *          {
-     *             "domain":""
-     *          }
-     *      ],
-     *      "baselayer":true,
-     *      "attribution":"",
-     *      "opacity": value
-     *  }]
-     */ 
+    * This method is used to mount all base layers to use in the terrabrasilis map
+    * @param {*} baseLayersOptions 
+    */
+    /*
+    JSON baselayers example
+    [
+        {
+            "id":"",
+            "name":"Google Satellite",
+            "title":"Google Satellite",
+            "description":"",
+            "attribution":"",
+            "workspace":"",
+            "capabilitiesUrl":"",
+            "opacity":0.9,
+            "baselayer":true,
+            "active":false,
+            "enable":true,
+            "created":"",
+            "datasource":{
+                "id":"5c489b1ebbfeb44c9df6aa5c",
+                "name":"Google Satellite",
+                "description":"Google Satellite",
+                "host":"https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+                "metadata":"",
+                "enabled":true,
+                "created":"2019-01-23 16:49:34",
+                "downloads":[
+
+                ],
+                "tools":[
+
+                ]
+            },
+            "tools":[
+
+            ],
+            "subdomains":[
+                "mt0",
+                "mt1",
+                "mt2",
+                "mt3"
+            ],
+            "metadata":"",
+            "dashboard":"",
+            "thirdHost":"",
+            "uiOrder":0,
+            "stackOrder":0,
+            "isRemovable":false,
+            "hasTranslate":true
+        }
+    ]
+    */    
     let mountBaseLayers = function(baseLayersOptions) {
         let styledBaselayers = [];
         let layersGroup = {
@@ -158,16 +194,12 @@ var Terrabrasilis = (function(){
                         _name: bl.name,
                         _baselayer: bl.baselayer                    
                     }
-                    if (bl.subdomains != null) {
-                        let domains = [];
-                        for(sd in bl.subdomains) {
-                            let dm = bl.subdomains[sd];
-                            domains.push(dm.domain);
-                        }                    
-                        options.subdomains = domains;
+                    if (bl.subdomains != null && bl.subdomains.length > 0) {
+                        options.subdomains = bl.subdomains;
                     }
                     //console.log(options);
-                    var baselayer = L.tileLayer(bl.host, options);                
+                    let host = bl.datasource == null ? '' : bl.datasource.host;
+                    var baselayer = L.tileLayer(host, options);               
                     baselayers[bl.title] = baselayer;
                 }
             }                      
@@ -180,7 +212,9 @@ var Terrabrasilis = (function(){
             if (baseLayersOptions.hasOwnProperty(key)) {
                 const toShow = baseLayersOptions[key];
                 if (toShow.active) {
-                    baselayers[toShow.title].addTo(map);
+                    baselayers[toShow.title]
+                        .addTo(map)
+                        .bringToBack();
                 }                 
             }
         }
@@ -189,24 +223,59 @@ var Terrabrasilis = (function(){
     }
 
     /**
-     * This method is used to mount all base layers to use in the terrabrasilis map   
-     * 
-     *  [{
-     *      "name":"",
-     *      "host":"",
-     *      "legend_color":null,
-     *      "workspace":"",
-     *      "active":false,
-     *      "subdomains":[
-     *          {
-     *             "domain":""
-     *          }
-     *      ],
-     *      "baselayer":true,
-     *      "attribution":"",
-     *      "opacity": value
-     *  }]
-     */ 
+    * This method is used to mount all base layers to use in the terrabrasilis map
+    * @param {*} baseLayersOptions 
+    */
+    /*
+    JSON baselayers example
+    [
+        {
+            "id":"",
+            "name":"Google Satellite",
+            "title":"Google Satellite",
+            "description":"",
+            "attribution":"",
+            "workspace":"",
+            "capabilitiesUrl":"",
+            "opacity":0.9,
+            "baselayer":true,
+            "active":false,
+            "enable":true,
+            "created":"",
+            "datasource":{
+                "id":"5c489b1ebbfeb44c9df6aa5c",
+                "name":"Google Satellite",
+                "description":"Google Satellite",
+                "host":"https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+                "metadata":"",
+                "enabled":true,
+                "created":"2019-01-23 16:49:34",
+                "downloads":[
+
+                ],
+                "tools":[
+
+                ]
+            },
+            "tools":[
+
+            ],
+            "subdomains":[
+                "mt0",
+                "mt1",
+                "mt2",
+                "mt3"
+            ],
+            "metadata":"",
+            "dashboard":"",
+            "thirdHost":"",
+            "uiOrder":0,
+            "stackOrder":0,
+            "isRemovable":false,
+            "hasTranslate":true
+        }
+    ]
+    */ 
     let mountCustomizedBaseLayers = function(baseLayersOptions) {
         var baselayers = {};
         
@@ -233,22 +302,18 @@ var Terrabrasilis = (function(){
                         _name: bl.name,
                         _baselayer: bl.baselayer                    
                     }
-                    if (bl.subdomains != null) {
-                        let domains = [];
-                        for(sd in bl.subdomains) {
-                            let dm = bl.subdomains[sd];
-                            domains.push(dm.domain);
-                        }                    
-                        options.subdomains = domains;
+                    if (bl.subdomains != null && bl.subdomains.length > 0) {
+                        options.subdomains = bl.subdomains;                        
                     }
                     //console.log(options);
-                    var baselayer = L.tileLayer(bl.host, options);
-                    baselayer.setZIndex(0);                
+                    let host = bl.datasource == null ? '' : bl.datasource.host;
+                    var baselayer = L.tileLayer(host, options);
+                    baselayer.setZIndex(0);
                     baselayers[bl.title] = baselayer;
                 }
             }                      
-        };        
-        
+        };
+
         for (const key in baseLayersOptions) {
             if (baseLayersOptions.hasOwnProperty(key)) {
                 const toShow = baseLayersOptions[key];
@@ -264,21 +329,50 @@ var Terrabrasilis = (function(){
     }
 
     /**
-     * This method is used to mount all overlayers to use in the terrabrasilis map     
+     * This method is used to mount all overlayers to use in the terrabrasilis map
      * 
-     * [{
-     *      "title":"",     
-     *      "name":"",
-     *      "host":"",
-     *      "legend_color":"",
-     *      "workspace":"",
-     *      "active":false,
-     *      "subdomain":[],
-     *      "baselayer":false,
-     *      "attribution": null,
-     *      "opacity": value
-     *  }]
+     * @param {*} overLayersOptions 
      */
+    /*
+    JSON overlayers example
+    [
+        {
+            "id" : "5c49f5bc1a21020001cd6638",
+            "name" : "yearly_deforestation_2013_2018",
+            "title" : "AMZ Yearly Deforestation",
+            "description" : "AMZ Yearly Deforestation",
+            "attribution" : "",
+            "workspace" : "prodes-amz",
+            "capabilitiesUrl" : "",
+            "stackOrder" : 2,
+            "opacity" : 1.0,
+            "baselayer" : false,
+            "active" : true,
+            "enabled" : true,
+            "created" : "2019-01-24 17:28:28",
+            "datasource" : {
+                "id" : "5c409e920e9b2a0b8424ef1b",
+                "name" : "Prodes Amazonia",
+                "description" : "Prodes Amazonia",
+                "host" : "http://terrabrasilis.dpi.inpe.br/geoserver/ows",
+                "metadata" : "",
+                "enabled" : true,
+                "created" : "2019-01-17 15:26:10",
+                "downloads" : [ ],
+                "tools" : [ ]
+            },
+            "tools" : [ ],
+            "subdomains" : [ ],
+            "metadata":"",
+            "dashboard":"",
+            "thirdHost":"",
+            "uiOrder":0,
+            "stackOrder":0,
+            "isRemovable":false,
+            "hasTranslate":true
+        }
+    ]
+    */ 
     let mountOverLayers = function(overLayersOptions) {
         let styledOverlayers = [];
         let layersGroup = {
@@ -313,20 +407,21 @@ var Terrabrasilis = (function(){
                         layers: ol.workspace + ":" + ol.name,
                         format: 'image/png',
                         transparent: true,
+			            tiled: true,
                         _name: ol.name,
                         _baselayer: ol.baselayer,
                         zIndex: zIndexCount++
                     }
                     if (ol.subdomains != null) {
                         if (ol.subdomains.length > 0) {
-                            let domains = [];
-                            for (const key in ol.subdomains) {
-                                if (ol.subdomains.hasOwnProperty(key)) {
-                                    const dm = ol.subdomains[key];
-                                    domains.push(dm.domain);
-                                }
-                            }                    
-                            options.subdomains = domains;   
+                            // let domains = [];
+                            // for (const key in ol.subdomains) {
+                            //     if (ol.subdomains.hasOwnProperty(key)) {
+                            //         const dm = ol.subdomains[key];
+                            //         domains.push(dm.domain);
+                            //     }
+                            // }                    
+                            options.subdomains = ol.subdomains;   
                         }                        
                     }
                     var overlayer = L.tileLayer.wms(ol.host, options);                
@@ -367,22 +462,53 @@ var Terrabrasilis = (function(){
     }
 
     /**
-     * This method is used to mount all overlayers to use in the terrabrasilis map     
+     * This method is used to mount all overlayers to use in the terrabrasilis map
+     * About the stackOrder parameter:
+     * To control the display order of layers into map use bigger values to putting the layer over the others and the minor values to put below.
      * 
-     * [{
-     *      "title":"",     
-     *      "name":"",
-     *      "host":"",
-     *      "legend_color":"",
-     *      "workspace":"",
-     *      "active":false,
-     *      "subdomain":[],
-     *      "baselayer":false,
-     *      "attribution": null,
-     *      "opacity": value
-     *  }]
+     * @param {*} overLayersOptions 
      */
-    let mountCustomizedOverLayers = function(overLayersOptions) {        
+    /*
+    JSON overlayers example
+    [
+        {
+            "id" : "5c49f5bc1a21020001cd6638",
+            "name" : "yearly_deforestation_2013_2018",
+            "title" : "AMZ Yearly Deforestation",
+            "description" : "AMZ Yearly Deforestation",
+            "attribution" : "",
+            "workspace" : "prodes-amz",
+            "capabilitiesUrl" : "",
+            "stackOrder" : 2,
+            "opacity" : 1.0,
+            "baselayer" : false,
+            "active" : true,
+            "enabled" : true,
+            "created" : "2019-01-24 17:28:28",
+            "datasource" : {
+                "id" : "5c409e920e9b2a0b8424ef1b",
+                "name" : "Prodes Amazonia",
+                "description" : "Prodes Amazonia",
+                "host" : "http://terrabrasilis.dpi.inpe.br/geoserver/ows",
+                "metadata" : "",
+                "enabled" : true,
+                "created" : "2019-01-17 15:26:10",
+                "downloads" : [ ],
+                "tools" : [ ]
+            },
+            "tools" : [ ],
+            "subdomains" : [ ],
+            "metadata":"",
+            "dashboard":"",
+            "thirdHost":"",
+            "uiOrder":0,
+            "stackOrder":0,
+            "isRemovable":false,
+            "hasTranslate":true
+        }
+    ]
+    */
+    let mountCustomizedOverLayers = function(overLayersOptions) {
         let overlayers = {};       
 
         if(typeof(overLayersOptions) == 'undefined' || overLayersOptions === null) {
@@ -391,8 +517,7 @@ var Terrabrasilis = (function(){
             return this;
         }           
         
-        let zIndexCount = 199;
-        for (const key in overLayersOptions) {  
+        for (const key in overLayersOptions) {
             if (overLayersOptions.hasOwnProperty(key)) {
                 const ol = overLayersOptions[key];
                 //console.log(ol);
@@ -401,23 +526,26 @@ var Terrabrasilis = (function(){
                         layers: ol.workspace + ":" + ol.name,
                         format: 'image/png',
                         transparent: true,
+			            tiled: true,
                         _name: ol.name,
                         _baselayer: ol.baselayer,
-                        zIndex: zIndexCount++
+                        zIndex: ol.stackOrder
                     }
                     if (ol.subdomains != null) {
                         if (ol.subdomains.length > 0) {
-                            let domains = [];
-                            for (const key in ol.subdomains) {
-                                if (ol.subdomains.hasOwnProperty(key)) {
-                                    const dm = ol.subdomains[key];
-                                    domains.push(dm.domain);
-                                }
-                            }                    
-                            options.subdomains = domains;   
+                            // let domains = [];
+                            // for (const key in ol.subdomains) {
+                            //     if (ol.subdomains.hasOwnProperty(key)) {
+                            //         const dm = ol.subdomains[key];
+                            //         domains.push(dm.domain);
+                            //     }
+                            // }                    
+                            options.subdomains = ol.subdomains;   
                         }                        
                     }
-                    var overlayer = L.tileLayer.wms(ol.host, options);                
+                    
+                    let host = ol.datasource.host.replace("ows", "gwc/service/wms");
+                    var overlayer = L.tileLayer.wms(host, options);                
                     overlayers[ol.title] = overlayer;
                 } 
             }                
@@ -433,6 +561,24 @@ var Terrabrasilis = (function(){
         }
 
         return this;
+    }
+
+    /**
+     * Reorders the list layers inside the map to change the layers stacking order on the viewer.
+     * Expect the stackOrder numeric parameter for each layer to define the zIndex for each layer inside the map.
+     * @param {*} layers One list of layers from external application.
+     */
+    let reorderOverLayers = function(layers) {
+        map.eachLayer(layer => {
+            
+            let oLayer=layers.find(l => {
+                if(l.name===layer.options._name) return l;
+            });
+            // set zindex into layer of the map reading stackOrder property from the external Layer definition
+            if(oLayer){
+                layer.setZIndex(oLayer.stackOrder);
+            }
+        });
     }
 
     /**
@@ -1198,9 +1344,9 @@ var Terrabrasilis = (function(){
     }
 
     /**
-     * This layer add layer to the map
+     * This method add one layer to the map.
      * 
-     * @param {*} layer 
+     * @param {*} layer The parameters to instantiate the Leaflet layer and add into map.
      */
     let activeLayer = function(layer) {
         if(typeof(layer) == 'undefined' || layer === null) {            
@@ -1291,7 +1437,7 @@ var Terrabrasilis = (function(){
         }             
         //console.log(layersOnMap);
         
-        let layerId = layer._leaflet_id
+        let layerId = layer._leaflet_id;
         for (let index = 0; index < layersOnMap.length; index++) {
             const element = layersOnMap[index];
             if(!(element._leaflet_id === layerId)) {
@@ -1514,6 +1660,7 @@ var Terrabrasilis = (function(){
             });
             resultsGetFeatureInfo.clearLayers();
             map.off("click", getLayerFeatureInfo); 
+            $("#map").css('cursor', '');
 
             /**
              * enable the coordinates tool
@@ -1536,21 +1683,32 @@ var Terrabrasilis = (function(){
     }
 
     let resizeMap = function() {
-
   	    map.invalidateSize();
-
     }
 
     let checkMap = function() {
-
         return !(map == undefined || map == null);
     }
 
     let removeMap = function() {
-
         map.remove();
-
     }
+
+    /**
+     * Enable loading to body
+     */
+    let enableLoading = function() {
+        console.log("Enable loading");
+        $("body").loading();
+    } 
+
+    /**
+     * Disable loading to body
+     */
+    let disableLoading = function() {
+        console.log("Disable loading");
+        $('body').loading('stop');
+    } 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // return
@@ -1569,6 +1727,7 @@ var Terrabrasilis = (function(){
         addOverLayers: mountOverLayers,
         addCustomizedBaseLayers: mountCustomizedBaseLayers,
         addCustomizedOverLayers: mountCustomizedOverLayers,
+        reorderOverLayers: reorderOverLayers,
         addGeoJsonLayers: mountGeoJsonLayers,
         enableDrawFeatureTool: enableDrawnFeature,
         enableLayersControlTool:  enableLayersControl,
@@ -1604,7 +1763,9 @@ var Terrabrasilis = (function(){
         moveLayerToBack: moveLayerToBack,
         moveLayerToFront: moveLayerToFront,
         addGetLayerFeatureInfoEventToMap: addGetLayerFeatureInfoEventToMap,
-        addShowCoordinatesEventToMap: addShowCoordinatesEventToMap
+        addShowCoordinatesEventToMap: addShowCoordinatesEventToMap,
+        enableLoading: enableLoading,
+        disableLoading: disableLoading
     }
      
 })(Terrabrasilis || {});
