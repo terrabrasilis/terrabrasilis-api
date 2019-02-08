@@ -31,6 +31,9 @@ var Terrabrasilis = (function(){
     let grades = [];
     let colors = [];
 
+    /* to control the enable or disable TimeDimension component */
+    let ctrlTimer = {control:null, layer:null, timeDimension:null};
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Terrabrasilis map
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1559,6 +1562,151 @@ var Terrabrasilis = (function(){
             resultsGetFeatureInfo.clearLayers();           
         };
     }
+
+    /* Start of the Time Dimension support methods. */
+
+    /**
+     * Enable or disable the TimeDimension layer for a WMS layer.
+     * @param {string} layerName The name of one layer that is already added in to map.
+     */
+    let onOffTimeDimension = function(layerName) {
+        if(ctrlTimer.control && ctrlTimer.layer==layerName) {
+            removeTimerControl();
+            addLeafletLayer(layerName);
+        }else{
+            removeTimerControl();
+            if(ctrlTimer.layer!=layerName) {
+                addLeafletLayer(ctrlTimer.layer);
+            }
+            addTimerControl(layerName);
+        }
+    }
+    
+    /**
+     * Removes the Leaflet TimeDimension control from the map.
+     * Uses the general reference of the last active control only if the ctrlTimer.layer  it is into the Time Dimension layer list.
+     */
+    let removeTimerControl = function() {
+        if(ctrlTimer.control){
+            var l = getTimeLayer(ctrlTimer.layer);
+            if(l){
+                ctrlTimer.control.remove(map);
+                overLayersTD[l.title].removeFrom(map);
+            }
+        }
+    }
+    
+    /**
+     * Add the Time Dimension control into the map for one specific layer.
+     * 
+     * @param {string} layerName 
+     */
+    let addTimerControl = function(layerName) {
+    
+        if(!ctrlTimer.timeDimension){
+            ctrlTimer.timeDimension = new L.TimeDimension();
+        }
+        
+        var options={
+            timeDimension: ctrlTimer.timeDimension,
+            limitSliders: false,
+            formatDate: {
+                formatMatcher: {year:'numeric',month:'numeric',day:'numeric'},
+                locale: 'pt-BR'
+            }
+        };
+        
+        ctrlTimer.control=L.control.timeDimension(options).addTo(map);
+        ctrlTimer.layer=layerName;
+        if(addLayerTimeDimension(layerName)){
+            console.log("Enable TimeDimension support to the "+layerName+" Layer.");
+            return true;
+        }else{
+            console.log("Failure TimeDimension support to the "+layerName+" Layer.");
+            removeTimerControl();
+            return false;
+        }
+    }
+
+
+    let createLeafletLayerFromConfig = function(layerConfig) {
+        let url = layerConfig.datasource.host.replace("ows", "gwc/service/wms");
+
+        generalZIndex++;
+
+        return L.tileLayer.wms(url, {
+            layers: layerConfig.workspace + ':' + layerConfig.name,
+            format: 'image/png',
+            transparent: true,
+            tiled: true,
+            zIndex: generalZIndex,
+            attribution: 'INPE/OBT/DPI/TerraBrasilis'
+        });
+    }
+
+    let createTimeDimensionLayerFromConfig = function(layerConfig) {
+        var tdOptions={
+            timeDimension: ctrlTimer.timeDimension,
+            requestTimeFromCapabilities: true,
+            getCapabilitiesUrl: layerConfig.datasource.host.replace("ows", layerConfig.workspace + "/" + layerConfig.name+"/ows"),
+            setDefaultTime: true,
+            getCapabilitiesLayerName: layerConfig.name,
+            wmsVersion: "1.3.0"
+            // getCapabilitiesParams: {
+            //     updateSequence:1
+            // }
+        };
+
+        return L.timeDimension.layer.wms(overLayers[layerConfig.title],tdOptions);
+    }
+    /**
+     * Create TimeDimension Layer if it not exists and add it to map.
+     * Before add TimeDimension to map, removes the default Leaflef Layer from the map.
+     * 
+     * @param {string} layerName, the layer name
+     */
+    let addLayerTimeDimension = function(layerName) {
+
+        var hasTimeLayer=getTimeLayer(layerName);
+
+        if(hasTimeLayer) {
+            
+            overLayers[hasTimeLayer.title].removeFrom(map);// Removing the default Leaflef Layer from the map.
+
+            if(!overLayersTD[hasTimeLayer.title]){
+                overLayersTD[hasTimeLayer.title] = createTimeDimensionLayerFromConfig(hasTimeLayer);
+            }
+            overLayersTD[hasTimeLayer.title].addTo(map);// Adding TimeDimension Layer to the map.
+        }
+        return hasTimeLayer;
+    }
+
+    let addLeafletLayer = function(layerName) {
+        var hasTimeLayer=getTimeLayer(layerName);
+
+        if(hasTimeLayer) {
+            // create and add new leaflet layer into map
+            var leafletLayer=createLeafletLayerFromConfig(hasTimeLayer);
+            leafletLayer.addTo(map);
+            overLayers[hasTimeLayer.title] = leafletLayer;
+        }
+    }
+
+    let getTimeLayer = function(layerName) {
+        if(layerName) {
+            if(layerName.indexOf(':')>0){
+                layerName=layerName.split(':')[1];
+            }
+            return timeConfigLayers.find(function(layer){
+                if(layer.name==layerName) {
+                    return layer;
+                }
+            });
+        }
+        return null;
+    }
+
+    /* The end of the Time Dimension support methods. */
 
     let resizeMap = function() {
 
