@@ -1,4 +1,5 @@
 const { Stack, Queue } = require('terrabrasilis-util');
+//require('terrabrasilis-timedimension');
 
 /**
  * This class use the Revealing Module Pattern.
@@ -21,7 +22,7 @@ var Terrabrasilis = (function(){
     let defaultZoom = 5;
     let defaultMapContainer = 'map';
     let constants = {
-        PROXY:"http://terrabrasilis.dpi.inpe.br/proxy?url="    
+        PROXY:"http://terrabrasilis.dpi.inpe.br/proxy"    
     };
     let resultsGetFeatureInfo;
 
@@ -32,7 +33,10 @@ var Terrabrasilis = (function(){
     let colors = [];
 
     /* to control the enable or disable TimeDimension component */
-    let ctrlTimer = {control:null, layer:null, timeDimension:null};
+    let _ctrlTimer = {control:null, layer:null, timeDimension:null};
+    let _timeConfigLayers = {};// store the default configurations for construct the TimeDimension layers when its needed.
+    let _overLayersTD = {};// The created instances of the TimeDimension layers
+    let _overLayers = {};// The created instances of the WMS Leaflet Layer.
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Terrabrasilis map
@@ -512,10 +516,10 @@ var Terrabrasilis = (function(){
     ]
     */
     let mountCustomizedOverLayers = function(overLayersOptions) {
-        let overlayers = {};       
+        //let overlayers = {};
 
         if(typeof(overLayersOptions) == 'undefined' || overLayersOptions === null) {
-            overlayers = null;
+            _overLayers = null;
             //console.log("no objects defined to mount overlayers!")
             return this;
         }           
@@ -549,7 +553,12 @@ var Terrabrasilis = (function(){
                     
                     let host = ol.datasource.host.replace("ows", "gwc/service/wms");
                     var overlayer = L.tileLayer.wms(host, options);                
-                    overlayers[ol.title] = overlayer;
+                    _overLayers[ol.title] = overlayer;
+                    if(ol.timeDimension) {
+                        // Show one button to enable/disable the TimerControl over map.
+                        console.log("The layer "+ol.name+" have time dimension.");
+                        _timeConfigLayers[ol.title] = ol;
+                    }
                 } 
             }                
         };              
@@ -558,7 +567,7 @@ var Terrabrasilis = (function(){
             if (overLayersOptions.hasOwnProperty(key)) {
                 const toShow = overLayersOptions[key];
                 if (toShow.active) {
-                    overlayers[toShow.title].addTo(map);
+                    _overLayers[toShow.title].addTo(map);
                 }                
             }
         }
@@ -1122,7 +1131,7 @@ var Terrabrasilis = (function(){
         marker.on('click', function(e) {    
             divTable.html('');         
             urls.forEach(url => {                
-                let urlToGetInfo = constants.PROXY + encodeURIComponent(url);            
+                let urlToGetInfo = constants.PROXY + "?url=" + encodeURIComponent(url);
                 
                 let table = $('<table/>')
                 table.addClass('table table-striped table-info');
@@ -1295,23 +1304,44 @@ var Terrabrasilis = (function(){
     }
 
     /**
-     * This method try to find the layer identified by name
+     * This method try to find the layer identified by name excluding the Layers with time dimension enabled.
      * 
      * @param {*} layerName 
      */
     let getLayerByName = function(layerName) {
         if(typeof(layerName) == 'undefined' || layerName === null) {            
             //console.log("layerName must not be null!");
-            return this;
+            //return this;
+            return null;
+        } 
+
+        let layer=null;
+        map.eachLayer(l => {
+            if(l.options._name && l.options._name === layerName && !layer) {
+                layer = l;
+            }
+        });
+
+        return layer;
+    }
+
+    /**
+     * This method try to find the Layers with time dimension enabled identified by name.
+     * 
+     * @param {*} layerName 
+     */
+    let getTimeLayerByName = function(layerName) {
+        if(typeof(layerName) == 'undefined' || layerName === null) {            
+            return null;
         } 
 
         let layer;
-        map.eachLayer(l => {                    
-            if(l.options._name) {
+        map.eachLayer(l => {
+            if(l.options._name && l.options.time) {
                 let name = l.options._name;
                 if (name === layerName) {
                     layer = l;  
-                    //console.log(l);
+                    return true;
                 }                
             }
         });
@@ -1327,22 +1357,29 @@ var Terrabrasilis = (function(){
     let isLayerActived = function(layer) {
         if(typeof(layer) == 'undefined' || layer === null) {            
             //console.log("layer must not be null!");
-            return this;
-        } 
-        return map.hasLayer(layer);
+            return false;
+        }
+        let ll=getLayerByName(layer.name);
+        return ( (ll)?(map.hasLayer(ll)):(false) );
     }
 
     /**
-     * This layer remove layer from the map
+     * This method remove layer from the map
      * 
      * @param {*} layer 
      */
     let deactiveLayer = function(layer) {
-        if(typeof(layer) == 'undefined' || layer === null) {            
+        if(!layer || !layer.name) {
             //console.log("layer must not be null!");
-            return this;
+            return false;
         }
-        map.removeLayer(layer);
+        if(_ctrlTimer.layer==layer.name) {
+            removeTimerControl();
+        }
+        let ll=getLayerByName(layer.name);
+        if(ll) {
+            map.removeLayer(ll);
+        }
     }
 
     /**
@@ -1351,7 +1388,7 @@ var Terrabrasilis = (function(){
      * @param {*} layer The parameters to instantiate the Leaflet layer and add into map.
      */
     let activeLayer = function(layer) {
-        if(typeof(layer) == 'undefined' || layer === null) {            
+        if(typeof(layer) == 'undefined' || layer === null) {
             //console.log("layer must not be null!");
             return this;
         }
@@ -1370,11 +1407,12 @@ var Terrabrasilis = (function(){
      * @param {*} layer 
      */
     let setOpacityToLayer = function(layer, value) {
-        if(typeof(layer) == 'undefined' || layer === null) {            
+        if(!layer || !value) {
             //console.log("layer must not be null!");
-            return this;
+            return false;
         }
-        layer.setOpacity(value);
+        let ll=getLayerByName(layer.name);
+        if(ll) ll.setOpacity(value);
     }
 
     /**
@@ -1401,18 +1439,19 @@ var Terrabrasilis = (function(){
         }             
         //console.log(layersOnMap);
 
-        let layerId = layer._leaflet_id
+        let ll=getLayerByName(layer.name);
+        let layerId = ll._leaflet_id
         for (let index = 0; index < layersOnMap.length; index++) {
             const element = layersOnMap[index];
             if(!(element._leaflet_id === layerId)) {
-                if(layer.options.zIndex < element.options.zIndex) {
-                    //console.log("moveLayerToFront from [ " + layer.options._name + " ] to [ " + element.options._name + " ]");
+                if(ll.options.zIndex < element.options.zIndex) {
+                    //console.log("moveLayerToFront from [ " + ll.options._name + " ] to [ " + element.options._name + " ]");
                 
                     let elementZIndex = element.options.zIndex;
-                    let layerZIndex = layer.options.zIndex;
+                    let layerZIndex = ll.options.zIndex;
 
-                    layer.setZIndex(elementZIndex);
-                    layer.options.zIndex = elementZIndex;
+                    ll.setZIndex(elementZIndex);
+                    ll.options.zIndex = elementZIndex;
 
                     element.setZIndex(layerZIndex);
                     element.options.zIndex = layerZIndex;
@@ -1438,19 +1477,20 @@ var Terrabrasilis = (function(){
             }
         }             
         //console.log(layersOnMap);
-        
-        let layerId = layer._leaflet_id;
+
+        let ll=getLayerByName(layer.name);
+        let layerId = ll._leaflet_id;
         for (let index = 0; index < layersOnMap.length; index++) {
             const element = layersOnMap[index];
             if(!(element._leaflet_id === layerId)) {
-                if(layer.options.zIndex > element.options.zIndex) {
-                    //console.log("moveLayerToBack [ " + layer.options._name + " ] to [ " + element.options._name + " ]");
+                if(ll.options.zIndex > element.options.zIndex) {
+                    //console.log("moveLayerToBack [ " + ll.options._name + " ] to [ " + element.options._name + " ]");
                 
                     let elementZIndex = element.options.zIndex;
-                    let layerZIndex = layer.options.zIndex;
+                    let layerZIndex = ll.options.zIndex;
 
-                    layer.setZIndex(elementZIndex);
-                    layer.options.zIndex = elementZIndex;
+                    ll.setZIndex(elementZIndex);
+                    ll.options.zIndex = elementZIndex;
 
                     element.setZIndex(layerZIndex);
                     element.options.zIndex = layerZIndex;
@@ -1691,13 +1731,13 @@ var Terrabrasilis = (function(){
      * @param {string} layerName The name of one layer that is already added in to map.
      */
     let onOffTimeDimension = function(layerName) {
-        if(ctrlTimer.control && ctrlTimer.layer==layerName) {
+        if(_ctrlTimer.control && _ctrlTimer.layer==layerName) {
             removeTimerControl();
             addLeafletLayer(layerName);
         }else{
             removeTimerControl();
-            if(ctrlTimer.layer!=layerName) {
-                addLeafletLayer(ctrlTimer.layer);
+            if(_ctrlTimer.layer!=layerName) {
+                addLeafletLayer(_ctrlTimer.layer);
             }
             addTimerControl(layerName);
         }
@@ -1705,14 +1745,17 @@ var Terrabrasilis = (function(){
     
     /**
      * Removes the Leaflet TimeDimension control from the map.
-     * Uses the general reference of the last active control only if the ctrlTimer.layer  it is into the Time Dimension layer list.
+     * Uses the general reference of the last active control only if the _ctrlTimer.layer  it is into the Time Dimension layer list.
      */
     let removeTimerControl = function() {
-        if(ctrlTimer.control){
-            var l = getTimeLayer(ctrlTimer.layer);
+        if(_ctrlTimer.control){
+            var l = getTimeLayer(_ctrlTimer.layer);
             if(l){
-                ctrlTimer.control.remove(map);
-                overLayersTD[l.title].removeFrom(map);
+                _ctrlTimer.control.remove(map);
+                _ctrlTimer.control=null;
+                _overLayersTD[l.title].removeFrom(map);
+                _ctrlTimer.layer=null;
+                _ctrlTimer.timeDimension=null;
             }
         }
     }
@@ -1724,12 +1767,12 @@ var Terrabrasilis = (function(){
      */
     let addTimerControl = function(layerName) {
     
-        if(!ctrlTimer.timeDimension){
-            ctrlTimer.timeDimension = new L.TimeDimension();
+        if(!_ctrlTimer.timeDimension){
+            _ctrlTimer.timeDimension = new L.TimeDimension();
         }
         
         var options={
-            timeDimension: ctrlTimer.timeDimension,
+            timeDimension: _ctrlTimer.timeDimension,
             limitSliders: false,
             formatDate: {
                 formatMatcher: {year:'numeric',month:'numeric',day:'numeric'},
@@ -1737,8 +1780,8 @@ var Terrabrasilis = (function(){
             }
         };
         
-        ctrlTimer.control=L.control.timeDimension(options).addTo(map);
-        ctrlTimer.layer=layerName;
+        _ctrlTimer.control=L.control.timeDimension(options).addTo(map);
+        _ctrlTimer.layer=layerName;
         if(addLayerTimeDimension(layerName)){
             console.log("Enable TimeDimension support to the "+layerName+" Layer.");
             return true;
@@ -1753,32 +1796,30 @@ var Terrabrasilis = (function(){
     let createLeafletLayerFromConfig = function(layerConfig) {
         let url = layerConfig.datasource.host.replace("ows", "gwc/service/wms");
 
-        generalZIndex++;
-
         return L.tileLayer.wms(url, {
             layers: layerConfig.workspace + ':' + layerConfig.name,
             format: 'image/png',
             transparent: true,
             tiled: true,
-            zIndex: generalZIndex,
+            _name: layerConfig.name,
+            _baselayer: layerConfig.baselayer,
+            zIndex: layerConfig.stackOrder,
             attribution: 'INPE/OBT/DPI/TerraBrasilis'
         });
     }
 
     let createTimeDimensionLayerFromConfig = function(layerConfig) {
         var tdOptions={
-            timeDimension: ctrlTimer.timeDimension,
+            timeDimension: _ctrlTimer.timeDimension,
             requestTimeFromCapabilities: true,
             getCapabilitiesUrl: layerConfig.datasource.host.replace("ows", layerConfig.workspace + "/" + layerConfig.name+"/ows"),
             setDefaultTime: true,
             getCapabilitiesLayerName: layerConfig.name,
-            wmsVersion: "1.3.0"
-            // getCapabilitiesParams: {
-            //     updateSequence:1
-            // }
+            wmsVersion: "1.3.0",
+            proxy: constants.PROXY
         };
 
-        return L.timeDimension.layer.wms(overLayers[layerConfig.title],tdOptions);
+        return L.timeDimension.layer.wms(_overLayers[layerConfig.title],tdOptions);
     }
     /**
      * Create TimeDimension Layer if it not exists and add it to map.
@@ -1792,12 +1833,12 @@ var Terrabrasilis = (function(){
 
         if(hasTimeLayer) {
             
-            overLayers[hasTimeLayer.title].removeFrom(map);// Removing the default Leaflef Layer from the map.
+            _overLayers[hasTimeLayer.title].removeFrom(map);// Removing the default Leaflef Layer from the map.
 
-            if(!overLayersTD[hasTimeLayer.title]){
-                overLayersTD[hasTimeLayer.title] = createTimeDimensionLayerFromConfig(hasTimeLayer);
+            if(!_overLayersTD[hasTimeLayer.title]){
+                _overLayersTD[hasTimeLayer.title] = createTimeDimensionLayerFromConfig(hasTimeLayer);
             }
-            overLayersTD[hasTimeLayer.title].addTo(map);// Adding TimeDimension Layer to the map.
+            _overLayersTD[hasTimeLayer.title].addTo(map);// Adding TimeDimension Layer to the map.
         }
         return hasTimeLayer;
     }
@@ -1809,7 +1850,7 @@ var Terrabrasilis = (function(){
             // create and add new leaflet layer into map
             var leafletLayer=createLeafletLayerFromConfig(hasTimeLayer);
             leafletLayer.addTo(map);
-            overLayers[hasTimeLayer.title] = leafletLayer;
+            _overLayers[hasTimeLayer.title] = leafletLayer;
         }
     }
 
@@ -1818,11 +1859,15 @@ var Terrabrasilis = (function(){
             if(layerName.indexOf(':')>0){
                 layerName=layerName.split(':')[1];
             }
-            return timeConfigLayers.find(function(layer){
-                if(layer.name==layerName) {
-                    return layer;
+
+            for(key in _timeConfigLayers) {
+                if (_timeConfigLayers.hasOwnProperty(key)) {
+                    let layer = _timeConfigLayers[key];
+                    if(layer.name==layerName) {
+                        return layer;
+                    }
                 }
-            });
+            }
         }
         return null;
     }
@@ -1912,7 +1957,10 @@ var Terrabrasilis = (function(){
         addGetLayerFeatureInfoEventToMap: addGetLayerFeatureInfoEventToMap,
         addShowCoordinatesEventToMap: addShowCoordinatesEventToMap,
         enableLoading: enableLoading,
-        disableLoading: disableLoading
+        disableLoading: disableLoading,
+
+        /* TimeDimension tool */
+        onOffTimeDimension: onOffTimeDimension
     }
      
 })(Terrabrasilis || {});
