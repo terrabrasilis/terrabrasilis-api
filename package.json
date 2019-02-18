@@ -20,6 +20,7 @@
   "author": "Terrabrasilis team (André Carvalho, Jether Rodrigues, Luiz Assis)",
   "license": "GPL-3.0",
   "dependencies": {
-    "terrabrasilis-util": "latest"
+    "terrabrasilis-util": "latest",
+    "terrabrasilis-timedimension": "latest"
   }
 }
