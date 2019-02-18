@@ -33,10 +33,20 @@ var Terrabrasilis = (function(){
     let colors = [];
 
     /* to control the enable or disable TimeDimension component */
-    let _ctrlTimer = {control:null, layer:null, timeDimension:null};
+    let _ctrlTimer = {
+        // The Time Dimension control
+        control:null,
+        // The layer name of the activated Time Dimension layer
+        layerName:null,
+        // The exists instance of the Leaflet Layer used to restore into map
+        leafletLayer:null,
+        // The created instance of the TimeDimension layer
+        timeDimensionLayer:null,
+        // The Time Dimension instance
+        timeDimension:null
+    };
     let _timeConfigLayers = {};// store the default configurations for construct the TimeDimension layers when its needed.
-    let _overLayersTD = {};// The created instances of the TimeDimension layers
-    let _overLayers = {};// The created instances of the WMS Leaflet Layer.
+    //let _overLayers = {};// The created instances of the WMS Leaflet Layer.
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Terrabrasilis map
@@ -516,10 +526,10 @@ var Terrabrasilis = (function(){
     ]
     */
     let mountCustomizedOverLayers = function(overLayersOptions) {
-        //let overlayers = {};
+        let overlayers = {};
 
         if(typeof(overLayersOptions) == 'undefined' || overLayersOptions === null) {
-            _overLayers = null;
+            overlayers = null;
             //console.log("no objects defined to mount overlayers!")
             return this;
         }           
@@ -553,7 +563,7 @@ var Terrabrasilis = (function(){
                     
                     let host = ol.datasource.host.replace("ows", "gwc/service/wms");
                     var overlayer = L.tileLayer.wms(host, options);                
-                    _overLayers[ol.title] = overlayer;
+                    overlayers[ol.title] = overlayer;
                     if(ol.timeDimension) {
                         // Show one button to enable/disable the TimerControl over map.
                         console.log("The layer "+ol.name+" have time dimension.");
@@ -567,7 +577,7 @@ var Terrabrasilis = (function(){
             if (overLayersOptions.hasOwnProperty(key)) {
                 const toShow = overLayersOptions[key];
                 if (toShow.active) {
-                    _overLayers[toShow.title].addTo(map);
+                    overlayers[toShow.title].addTo(map);
                 }                
             }
         }
@@ -976,26 +986,6 @@ var Terrabrasilis = (function(){
     } 
     
     /**
-     * This method return the layer geoJSON data
-     * 
-     * @param layer 
-     */
-    let getGeoJSON = function (layer) {
-        return layer.toGeoJSON();
-    }
-
-    /**
-     * http://terraformer.io/
-     * 
-     * This method receive a WKT string and return the Terraformer GeoJSON
-     * 
-     * @param wkt 
-     */
-    let getTerraformerGeoJSON = function (wkt) {
-        return Terraformer.WKT.parse(wkt);
-    }
-
-    /**
      * http://terraformer.io/
      * 
      * This method receive a GeoJSON string and return the Terraformer WKT
@@ -1004,42 +994,6 @@ var Terrabrasilis = (function(){
      */
     let getTerraformerWKT = function (layer) {
         return Terraformer.WKT.convert(layer.toGeoJSON().geometry);
-    }
-
-    /**
-     * This method receive a layer object and return the WKT string 
-     * 
-     * @param layer 
-     */
-    let toWKT = function (layer) {
-        let lng, lat, coords = [];
-        if (layer instanceof L.Polygon || layer instanceof L.Polyline) {
-            let latlngs = layer.getLatLngs();
-            for (let i = 0; i < latlngs.length; i++) {   
-                let latlng = latlngs[i];            
-                if(latlng.length){
-                    for(let j = 0; j < latlng.length; j++){                    
-                        coords.push(latlng[j].lng + " " + latlng[j].lat);               
-                        if (j === 0) {
-                            lng = latlng[j].lng;
-                            lat = latlng[j].lat;
-                        }
-                    }
-                } else {
-                    if (i === 0) {
-                        lng = latlngs[i].lng;
-                        lat = latlngs[i].lat;
-                    }
-                }
-            };
-            if (layer instanceof L.Polygon) {
-                return "POLYGON((" + coords.join(",") + "," + lng + " " + lat + "))";
-            } else if (layer instanceof L.Polyline) {
-                return "LINESTRING(" + coords.join(",") + ")";
-            }
-        } else if (layer instanceof L.Marker) {
-            return "POINT(" + layer.getLatLng().lng + " " + layer.getLatLng().lat + ")";
-        }
     }
 
     /**
@@ -1195,55 +1149,6 @@ var Terrabrasilis = (function(){
     }
 
     /**
-     * treats the layers url to get feature info
-     * 
-     * @param {*} event 
-     */
-    let getFeatureInfoUrl = function (event) {
-        let point = map.latLngToContainerPoint(event.latlng, map.getZoom()), 
-            size = map.getSize(),
-            bounds = map.getBounds();
-
-        let result = [];
-        map.eachLayer(layer => {                    
-            let iframeTemplate = "<iframe src='#url#' width='450' height='auto' frameborder='0'></iframe>";
-            let match = /gwc\/service/;                    
-            if(layer.options.layers) {
-                defaultParams = {
-                    request: 'GetFeatureInfo',
-                    service: 'WMS',                    
-                    srs: 'EPSG:4326',
-                    styles: layer.wmsParams.styles,
-                    transparent: layer.wmsParams.transparent,
-                    version: layer.wmsParams.version,      
-                    format: layer.wmsParams.format,
-                    format:'',
-                    bbox: bounds.toBBoxString(),
-                    height: size.y.toFixed(0),
-                    width: size.x.toFixed(0),
-                    layers: layer.wmsParams.layers,
-                    query_layers: layer.wmsParams.layers,                    
-                };
-
-                paramsOptions = {
-                    'info_format': 'text/html',
-                    //'propertyName': 'NAME,AREA_CODE,DESCRIPTIO'
-                }
-
-                params = L.Util.extend(defaultParams, paramsOptions || {});
-        
-                params[params.version === '1.3.0' ? 'i' : 'x'] = point.x;
-                params[params.version === '1.3.0' ? 'j' : 'y'] = point.y;                
-                
-                let url = match.test(layer._url) == true 
-                    ? layer._url.replace("gwc/service", layer.wmsParams.layers.split(':')[0]) : layer._url;                
-                result.push(iframeTemplate.replace("#url#", url + L.Util.getParamString(params, url, true)));                    
-            }
-        }); 
-        return result;
-    }
-
-    /**
      * treats the layers url to get feature info in JSON format
      * 
      * @param {*} event 
@@ -1287,23 +1192,6 @@ var Terrabrasilis = (function(){
     }
 
     /**
-     * show a popup to getfeature info
-     * 
-     * @param {*} err 
-     * @param {*} latlng 
-     * @param {*} content 
-     */
-    let showGetFeatureInfo = function (err, latlng, content) {
-        if (err) { /*console.log(err);*/ return; } 
-
-        L.popup({ maxWidth:500 })
-           .setLatLng(latlng)
-           .setContent(content.join(""))
-           //.setContent(content)
-           .openOn(map);
-    }
-
-    /**
      * This method try to find the layer identified by name excluding the Layers with time dimension enabled.
      * 
      * @param {*} layerName 
@@ -1319,30 +1207,6 @@ var Terrabrasilis = (function(){
         map.eachLayer(l => {
             if(l.options._name && l.options._name === layerName && !layer) {
                 layer = l;
-            }
-        });
-
-        return layer;
-    }
-
-    /**
-     * This method try to find the Layers with time dimension enabled identified by name.
-     * 
-     * @param {*} layerName 
-     */
-    let getTimeLayerByName = function(layerName) {
-        if(typeof(layerName) == 'undefined' || layerName === null) {            
-            return null;
-        } 
-
-        let layer;
-        map.eachLayer(l => {
-            if(l.options._name && l.options.time) {
-                let name = l.options._name;
-                if (name === layerName) {
-                    layer = l;  
-                    return true;
-                }                
             }
         });
 
@@ -1373,7 +1237,8 @@ var Terrabrasilis = (function(){
             //console.log("layer must not be null!");
             return false;
         }
-        if(_ctrlTimer.layer==layer.name) {
+        // if time dimension is enabled for this layer, remove it.
+        if(layer.name==_ctrlTimer.layerName) {
             removeTimerControl();
         }
         let ll=getLayerByName(layer.name);
@@ -1501,21 +1366,6 @@ var Terrabrasilis = (function(){
         }
     }
     
-    /**
-     * return the selected layers
-     */
-    let getIdentifyLayers = function () {
-        let result = [];
-        map.eachLayer(layer => {        
-            //console.log(layer);
-            if(layer.options._name) {
-                result.push(layer);
-            }
-        });
-
-        return result;
-    }
-
     /**
      * This method iterate under layerControl layers and identify the overlayers
      */
@@ -1731,30 +1581,34 @@ var Terrabrasilis = (function(){
      * @param {string} layerName The name of one layer that is already added in to map.
      */
     let onOffTimeDimension = function(layerName) {
-        if(_ctrlTimer.control && _ctrlTimer.layer==layerName) {
-            removeTimerControl();
-            addLeafletLayer(layerName);
-        }else{
-            removeTimerControl();
-            if(_ctrlTimer.layer!=layerName) {
-                addLeafletLayer(_ctrlTimer.layer);
-            }
-            addTimerControl(layerName);
-        }
+
+        let isNewLayer=_ctrlTimer.layerName!=layerName;
+        removeTimerControl();
+        if(isNewLayer) addTimerControl(layerName);
     }
     
     /**
      * Removes the Leaflet TimeDimension control from the map.
-     * Uses the general reference of the last active control only if the _ctrlTimer.layer  it is into the Time Dimension layer list.
+     * Uses the general reference of the last active control only if the _ctrlTimer.layerName it is into the Time Dimension layer list.
      */
     let removeTimerControl = function() {
         if(_ctrlTimer.control){
-            var l = getTimeLayer(_ctrlTimer.layer);
+            var l = getTimeLayer(_ctrlTimer.layerName);
             if(l){
+                // remove both control and layer TimeDimension from map.
                 _ctrlTimer.control.remove(map);
+                _ctrlTimer.timeDimensionLayer.removeFrom(map);
+
+                // restore Leaflet Layer to map
+                _ctrlTimer.leafletLayer.options.time=null;
+                _ctrlTimer.leafletLayer._visible=true;
+                _ctrlTimer.leafletLayer.addTo(map);
+
+                // clear all referencies
                 _ctrlTimer.control=null;
-                _overLayersTD[l.title].removeFrom(map);
-                _ctrlTimer.layer=null;
+                _ctrlTimer.timeDimensionLayer=null;
+                _ctrlTimer.layerName=null;
+                _ctrlTimer.leafletLayer=null;
                 _ctrlTimer.timeDimension=null;
             }
         }
@@ -1781,7 +1635,7 @@ var Terrabrasilis = (function(){
         };
         
         _ctrlTimer.control=L.control.timeDimension(options).addTo(map);
-        _ctrlTimer.layer=layerName;
+        _ctrlTimer.layerName=layerName;
         if(addLayerTimeDimension(layerName)){
             console.log("Enable TimeDimension support to the "+layerName+" Layer.");
             return true;
@@ -1792,22 +1646,10 @@ var Terrabrasilis = (function(){
         }
     }
 
-
-    let createLeafletLayerFromConfig = function(layerConfig) {
-        let url = layerConfig.datasource.host.replace("ows", "gwc/service/wms");
-
-        return L.tileLayer.wms(url, {
-            layers: layerConfig.workspace + ':' + layerConfig.name,
-            format: 'image/png',
-            transparent: true,
-            tiled: true,
-            _name: layerConfig.name,
-            _baselayer: layerConfig.baselayer,
-            zIndex: layerConfig.stackOrder,
-            attribution: 'INPE/OBT/DPI/TerraBrasilis'
-        });
-    }
-
+    /**
+     * Used to create the TimeDimension Layer that encapsulate the Default WMS Leaflet Layer.
+     * @param {JSON} layerConfig The JSON layer config from external app.
+     */
     let createTimeDimensionLayerFromConfig = function(layerConfig) {
         var tdOptions={
             timeDimension: _ctrlTimer.timeDimension,
@@ -1819,7 +1661,8 @@ var Terrabrasilis = (function(){
             proxy: constants.PROXY
         };
 
-        return L.timeDimension.layer.wms(_overLayers[layerConfig.title],tdOptions);
+        let ll=getLayerByName(layerConfig.name);
+        return L.timeDimension.layer.wms(ll,tdOptions);
     }
     /**
      * Create TimeDimension Layer if it not exists and add it to map.
@@ -1828,30 +1671,23 @@ var Terrabrasilis = (function(){
      * @param {string} layerName, the layer name
      */
     let addLayerTimeDimension = function(layerName) {
-
         var hasTimeLayer=getTimeLayer(layerName);
 
-        if(hasTimeLayer) {
-            
-            _overLayers[hasTimeLayer.title].removeFrom(map);// Removing the default Leaflef Layer from the map.
-
-            if(!_overLayersTD[hasTimeLayer.title]){
-                _overLayersTD[hasTimeLayer.title] = createTimeDimensionLayerFromConfig(hasTimeLayer);
+        if(hasTimeLayer && isLayerActived({name:layerName})) {
+            if(!_ctrlTimer.timeDimensionLayer) {
+                _ctrlTimer.timeDimensionLayer = createTimeDimensionLayerFromConfig(hasTimeLayer);
             }
-            _overLayersTD[hasTimeLayer.title].addTo(map);// Adding TimeDimension Layer to the map.
+
+            _ctrlTimer.leafletLayer=getLayerByName(layerName);
+
+            // Removing the default Leaflet Layer from the map.
+            map.removeLayer(_ctrlTimer.leafletLayer);
+
+            // Adding TimeDimension Layer to the map.
+            _ctrlTimer.timeDimensionLayer.addTo(map);
         }
+
         return hasTimeLayer;
-    }
-
-    let addLeafletLayer = function(layerName) {
-        var hasTimeLayer=getTimeLayer(layerName);
-
-        if(hasTimeLayer) {
-            // create and add new leaflet layer into map
-            var leafletLayer=createLeafletLayerFromConfig(hasTimeLayer);
-            leafletLayer.addTo(map);
-            _overLayers[hasTimeLayer.title] = leafletLayer;
-        }
     }
 
     let getTimeLayer = function(layerName) {
