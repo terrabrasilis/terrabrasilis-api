@@ -1582,7 +1582,7 @@ var Terrabrasilis = (function(){
      * Optionally, you may use the option to aggregate times when walking through the timeline of a Layer.
      * 
      * @param {string} layerName The name of one layer that is already added in to map.
-     * @param {boolen} aggregateTimes The control parameter to set the time aggregate option. Default is false.
+     * @param {boolean} aggregateTimes The control parameter to set the time aggregate option. Default is false.
      */
     let onOffTimeDimension = function(layerName, aggregateTimes=false) {
 
