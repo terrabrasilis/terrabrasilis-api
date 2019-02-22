@@ -1579,13 +1579,16 @@ var Terrabrasilis = (function(){
 
     /**
      * Enable or disable the TimeDimension layer for a WMS layer.
+     * Optionally, you may use the option to aggregate times when walking through the timeline of a Layer.
+     * 
      * @param {string} layerName The name of one layer that is already added in to map.
+     * @param {boolen} aggregateTimes The control parameter to set the time aggregate option. Default is false.
      */
-    let onOffTimeDimension = function(layerName) {
+    let onOffTimeDimension = function(layerName, aggregateTimes=false) {
 
         let isNewLayer=_ctrlTimer.layerName!=layerName;
         removeTimerControl();
-        if(isNewLayer) addTimerControl(layerName);
+        if(isNewLayer) addTimerControl(layerName, aggregateTimes);
     }
     
     /**
@@ -1617,15 +1620,16 @@ var Terrabrasilis = (function(){
     
     /**
      * Add the Time Dimension control into the map for one specific layer.
+     * Optionally, you may use the option to aggregate times when walking through the timeline of a Layer.
      * 
-     * @param {string} layerName 
+     * @param {string} layerName The layer name to enable the Time Dimension tool over the map.
+     * @param {boolen} aggregateTimes The control parameter to set the time aggregate option.
      */
-    let addTimerControl = function(layerName) {
+    let addTimerControl = function(layerName, aggregateTimes) {
     
         if(!_ctrlTimer.timeDimension){
             let tdOptions={
-                // use this option to aggregate times when walking through the timeline of a Layer.
-                aggregateTimes:true
+                aggregateTimes:aggregateTimes
             };
             _ctrlTimer.timeDimension = new L.TimeDimension(tdOptions);
         }
