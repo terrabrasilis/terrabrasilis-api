@@ -1622,7 +1622,11 @@ var Terrabrasilis = (function(){
     let addTimerControl = function(layerName) {
     
         if(!_ctrlTimer.timeDimension){
-            _ctrlTimer.timeDimension = new L.TimeDimension();
+            let tdOptions={
+                // use this option to aggregate times when walking through the timeline of a Layer.
+                aggregateTimes:true
+            };
+            _ctrlTimer.timeDimension = new L.TimeDimension(tdOptions);
         }
         
         var options={
