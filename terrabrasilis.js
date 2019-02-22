@@ -769,6 +769,7 @@ var Terrabrasilis = (function(){
                 const toShow = geoJson[key];
                 if (toShow.active) {                    
                     overlayers[toShow.name].addTo(map);
+                    map.fitBounds(overlayers[toShow.name].getBounds());
                     buildInfo();
                     info.addTo(map);
                     legend.addTo(map);
