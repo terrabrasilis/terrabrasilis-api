@@ -1,5 +1,7 @@
 const { Stack, Queue } = require('terrabrasilis-util');
-//require('terrabrasilis-timedimension');
+const L = require('leaflet');
+require('terrabrasilis-timedimension');
+require('terrabrasilis-map-plugins');
 
 /**
  * This class use the Revealing Module Pattern.
