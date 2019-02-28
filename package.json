@@ -1,6 +1,6 @@
 {
   "name": "terrabrasilis-api",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "API to build map and enable tools to use in Terrabrasilis webmap application",
   "main": "terrabrasilis.js",
   "scripts": {
@@ -20,7 +20,9 @@
   "author": "Terrabrasilis team (André Carvalho, Jether Rodrigues, Luiz Fernando Assis)",
   "license": "GPL-3.0",
   "dependencies": {
+    "terrabrasilis-map-plugins": "latest",
+    "terrabrasilis-timedimension": "latest",
     "terrabrasilis-util": "latest",
-    "terrabrasilis-timedimension": "latest"
+    "leaflet": "1.3.1"
   }
 }

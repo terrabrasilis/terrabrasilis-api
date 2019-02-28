@@ -1,5 +1,7 @@
 const { Stack, Queue } = require('terrabrasilis-util');
-//require('terrabrasilis-timedimension');
+const L = require('leaflet');
+require('terrabrasilis-timedimension');
+require('terrabrasilis-map-plugins');
 
 /**
  * This class use the Revealing Module Pattern.
@@ -1579,13 +1581,16 @@ var Terrabrasilis = (function(){
 
     /**
      * Enable or disable the TimeDimension layer for a WMS layer.
+     * Optionally, you may use the option to aggregate times when walking through the timeline of a Layer.
+     * 
      * @param {string} layerName The name of one layer that is already added in to map.
+     * @param {boolean} aggregateTimes The control parameter to set the time aggregate option. Default is false.
      */
-    let onOffTimeDimension = function(layerName) {
+    let onOffTimeDimension = function(layerName, aggregateTimes=false) {
 
         let isNewLayer=_ctrlTimer.layerName!=layerName;
         removeTimerControl();
-        if(isNewLayer) addTimerControl(layerName);
+        if(isNewLayer) addTimerControl(layerName, aggregateTimes);
     }
     
     /**
@@ -1617,13 +1622,18 @@ var Terrabrasilis = (function(){
     
     /**
      * Add the Time Dimension control into the map for one specific layer.
+     * Optionally, you may use the option to aggregate times when walking through the timeline of a Layer.
      * 
-     * @param {string} layerName 
+     * @param {string} layerName The layer name to enable the Time Dimension tool over the map.
+     * @param {boolen} aggregateTimes The control parameter to set the time aggregate option.
      */
-    let addTimerControl = function(layerName) {
+    let addTimerControl = function(layerName, aggregateTimes) {
     
         if(!_ctrlTimer.timeDimension){
-            _ctrlTimer.timeDimension = new L.TimeDimension();
+            let tdOptions={
+                aggregateTimes:aggregateTimes
+            };
+            _ctrlTimer.timeDimension = new L.TimeDimension(tdOptions);
         }
         
         var options={
