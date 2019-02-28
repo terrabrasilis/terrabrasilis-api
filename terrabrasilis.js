@@ -2,6 +2,7 @@ const { Stack, Queue } = require('terrabrasilis-util');
 const L = require('leaflet');
 require('terrabrasilis-timedimension');
 require('terrabrasilis-map-plugins');
+var leafletEsriGeocoding = require('esri-leaflet-geocoder');
 
 /**
  * This class use the Revealing Module Pattern.
@@ -935,7 +936,7 @@ var Terrabrasilis = (function(){
      * this method enable search location using esri-leaflet plugin
      */
     let enableGeocodingControl = function () {
-        let searchControl = L.esri.Geocoding.geosearch().addTo(map);
+        let searchControl = leafletEsriGeocoding.geosearch().addTo(map);
 
         let results = L.layerGroup().addTo(map);
 
