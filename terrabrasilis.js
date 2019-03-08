@@ -1006,7 +1006,33 @@ var Terrabrasilis = (function(){
      * @param event 
      */
     let showCoordinates = function (event) {
-        alert(event.latlng);
+
+        let popupTemplate=L.DomUtil.create('div', '');
+        popupTemplate.innerHTML="Lat: "+event.latlng.lat+"<br/>Lng: "+event.latlng.lng;
+        let copyInfo=L.DomUtil.create('div', '', popupTemplate);
+        copyInfo.innerHTML="Click to copy: ";
+
+        // This component will be positioned out of viewport.
+        let inputText = L.DomUtil.create('textarea', '', popupTemplate);
+        inputText.value=event.latlng.lat+','+event.latlng.lng;
+        inputText.setAttribute('readonly', '');
+        inputText.setAttribute('style', 'position:absolute;left:-9999px;');
+
+        let onClick = function(e) {
+            inputText.select();
+            copyInfo.innerHTML=( (document.execCommand('copy'))?('Copied!'):('Failure on copy!') );
+        };
+
+        let iconCopy = L.DomUtil.create('i', 'fa fa-clipboard', copyInfo);
+        iconCopy.setAttribute('aria-hidden','true');
+        iconCopy.setAttribute('style','cursor:pointer;');
+        iconCopy.setAttribute('title','Click to copy coordinates.');
+        iconCopy.addEventListener('click', onClick);
+
+        L.popup({width: 320})
+        .setLatLng(event.latlng)
+        .setContent(popupTemplate)
+        .openOn(map);
     }
 
     /**
