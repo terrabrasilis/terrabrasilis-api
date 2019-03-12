@@ -1193,10 +1193,20 @@ var Terrabrasilis = (function(){
             size = map.getSize(),
             bounds = map.getBounds();
 
-        let result = [];
-        map.eachLayer(layer => {                    
-            let match = /gwc\/service/;                
-            if(layer.options.layers) {
+        let result = [], ctrlReplication = [];
+        map.eachLayer(layer => {
+            let match = /gwc\/service/;
+            let hasReplication = function(lName){
+                ctrlReplication.some(function(l){
+                    if(l==lName){
+                        return true;
+                    }
+                });
+                return false;
+            };
+
+            if(layer.options.layers && !hasReplication(layer.options.layers)) {
+                ctrlReplication.push(layer.options.layers);
                 defaultParams = {
                     request: 'GetFeatureInfo',
                     service: 'WMS',
