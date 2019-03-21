@@ -85,4 +85,7 @@ Travis CI: [![Build Status](https://travis-ci.org/Terrabrasilis/terrabrasilis-ap
 * 0.0.19 release
 * 0.0.20 release
 * 0.0.21 release
-* 0.0.22 release [latest]
+* 0.0.22 release 
+* 0.0.23 release 
+* 0.0.24 release 
+* 0.0.25 release [latest]
