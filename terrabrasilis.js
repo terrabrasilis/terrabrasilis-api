@@ -1,5 +1,8 @@
 const { Stack, Queue } = require('terrabrasilis-util');
-//require('terrabrasilis-timedimension');
+const L = require('leaflet');
+require('terrabrasilis-timedimension');
+require('terrabrasilis-map-plugins');
+var leafletEsriGeocoding = require('esri-leaflet-geocoder');
 
 /**
  * This class use the Revealing Module Pattern.
@@ -934,7 +937,7 @@ var Terrabrasilis = (function(){
      * this method enable search location using esri-leaflet plugin
      */
     let enableGeocodingControl = function () {
-        let searchControl = L.esri.Geocoding.geosearch().addTo(map);
+        let searchControl = leafletEsriGeocoding.geosearch().addTo(map);
 
         let results = L.layerGroup().addTo(map);
 
@@ -1059,95 +1062,100 @@ var Terrabrasilis = (function(){
     /**
      * This method get the feature layer info (just selected layers)
      * 
-     * @param event 
+     * @param event, the event when click occurs.
      */
-    let getLayerFeatureInfo = function (event, showInPopup) {        
+    let getLayerFeatureInfo = function (event) {
+
+        // Define default icons to instruct the webpack to copy this icon files from assets to bundle.
+        var tbIcon = L.icon({
+            iconUrl: '../../../../assets/img/leaflet/marker-icon.png',
+            iconRetinaUrl: '../../../../assets/img/leaflet/marker-icon-2x.png',
+            iconSize: [25, 41],
+            iconAnchor: [12.5, 41],
+            popupAnchor: [-1, -41],
+            shadowUrl: '../../../../assets/img/leaflet/marker-shadow.png',
+            shadowSize: [41, 41],
+            shadowAnchor: [12.5, 41]
+        });
+
         let urls = getFeatureInfoUrlJson(event);
-          
-        let divTable = $('<div/>');
-        divTable.addClass('table-responsive'); 
-        divTable.attr('id', 'getfeatureinfo');
-        
-        let loading = $('<div/>')
-        loading.addClass('lds-dual-ring');
-        loading.attr('id', 'loading');
-        divTable.append(loading);
 
-        let initialPopup = L.popup({ 
+        let popupTemplate=L.DomUtil.create('div', 'table-responsive');
+        popupTemplate.setAttribute('id', 'getfeatureinfo');
+
+        let loading = L.DomUtil.create('div', 'lds-dual-ring', popupTemplate);
+        loading.setAttribute('id', 'popuploading');
+
+        let popupOptions = {
             maxWidth: "auto",
-            minWidth: 450
-        }).setContent(divTable[0].innerHTML);
-        //.setLatLng(event.latlng) 
-        //.openOn(map);
+            minWidth: 450,
+            autoClose: false
+        };
+        let popup = L.popup(popupOptions).setLatLng(event.latlng).setContent(popupTemplate);
 
-        let marker = L.marker(event.latlng).bindPopup(initialPopup, { autoClose: false }).openPopup();
-        
-        let popup = marker._popup;
-
-        marker.on('click', function(e) {    
-            divTable.html('');         
-            urls.forEach(url => {                
+        let onOpen = function(e) {
+            // if is the first time, so will request feature infos otherwise abort.
+            if(popupTemplate.childElementCount>1){
+                return false;
+            }
+            urls.forEach(url => {
                 let urlToGetInfo = constants.PROXY + "?url=" + encodeURIComponent(url);
-                
-                let table = $('<table/>')
-                table.addClass('table table-striped table-info');
-                let tableBody = $('<tbody/>');
-                table.append(tableBody);                      
+                let table = L.DomUtil.create('table', 'table table-striped table-info');
+                let tableBody=L.DomUtil.create('tbody', '', table);
     
                 $.get(urlToGetInfo).done(function(data) {
-                    //console.log(data);
-                    $(popup._contentNode).html(divTable[0].innerHTML);
                     if(data.features.length > 0) {
-                        data.features.forEach(element => {      
+                        data.features.forEach(element => {
                             /**
                              * https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/Object/entries
                              */                              
                             if(Object.keys(element.properties).length > 0) {
-                                let rowTitle = $('<tr/>');
-                                rowTitle.addClass('table-active');
-                                let colTitle = $('<td/>')
-                                colTitle.attr('colspan', 3);
-                                colTitle.append("<b>" + (element.id.split(".")[0]).toUpperCase() + "</b>" );
-                                rowTitle.append(colTitle);
-                                table.append(rowTitle);
-            
-                                Object.entries(element.properties).forEach(([key, value]) => {                         
+
+                                let tr = L.DomUtil.create('tr', 'table-active', tableBody);
+                                let td = L.DomUtil.create('td', '', tr);
+                                td.setAttribute('colspan', '3');
+                                let textTitle = L.DomUtil.create('b', '', td);
+                                textTitle.innerText = (element.id.split(".")[0]).toUpperCase();
+
+                                Object.entries(element.properties).forEach(([key, value]) => {
                                     if (value != null) {
-                                        let row = $('<tr/>');
-                                        let colLeft = $('<td/>');
-                                        colLeft.append(key);
-                                        let colRight = $('<td/>');
-                                        colRight.attr('colspan', 2);
-                                        colRight.append(value);
-                                        row.append(colLeft);
-                                        row.append(colRight);
-                                        tableBody.append(row);
+
+                                        let tr = L.DomUtil.create('tr', '', tableBody);
+                                        let tdLeft = L.DomUtil.create('td', '', tr);
+                                        tdLeft.innerText = key;
+
+                                        let tdRight = L.DomUtil.create('td', '', tr);
+                                        tdRight.setAttribute('colspan', '2');
+                                        tdRight.innerText = value;
                                     }                                
                                 });
                             }                                                                                             
-                        });                        
-                        divTable.append(table);  
+                        });
+                        popupTemplate.append(table);
                     }
 
-                    if(data.features.length < 0) {                        
-                        divTable.append('<p>No data to show!</p>');                        
+                    if(data.features.length < 0) {
+                        popupTemplate.append('<p>No data to show!</p>');
                     }
 
-                }).fail(function() {                    
-                    divTable.append('<p>The server is not responding the request!</p>');                   
+                }).fail(function() {
+                    popupTemplate.append('<p>The server is not responding the request!</p>');
                 }).always(function() {
-                    $(popup._contentNode).html('');
-                    loading.remove();
-                    $(popup._contentNode).html(divTable[0].innerHTML);    
-                    popup._updateLayout();
-                    popup._updatePosition();
+                    if(popupTemplate.getElementsByClassName(loading.className).length){
+                        loading.remove();
+                    }
+                    popup.update();
                 }); 
-            });            
-            return false;
-        });
-        
-        marker.fire('click');
-        resultsGetFeatureInfo.addLayer(marker);        
+            });
+        };
+
+        map.on('popupopen', onOpen);
+
+        let marker = L.marker(event.latlng, {icon: tbIcon}).bindPopup(popup);
+
+        resultsGetFeatureInfo.addLayer(marker);
+
+        marker.openPopup(event.latlng);
     }
 
     /**
@@ -1580,13 +1588,16 @@ var Terrabrasilis = (function(){
 
     /**
      * Enable or disable the TimeDimension layer for a WMS layer.
+     * Optionally, you may use the option to aggregate times when walking through the timeline of a Layer.
+     * 
      * @param {string} layerName The name of one layer that is already added in to map.
+     * @param {boolean} aggregateTimes The control parameter to set the time aggregate option. Default is false.
      */
-    let onOffTimeDimension = function(layerName) {
+    let onOffTimeDimension = function(layerName, aggregateTimes=false) {
 
         let isNewLayer=_ctrlTimer.layerName!=layerName;
         removeTimerControl();
-        if(isNewLayer) addTimerControl(layerName);
+        if(isNewLayer) addTimerControl(layerName, aggregateTimes);
     }
     
     /**
@@ -1618,13 +1629,18 @@ var Terrabrasilis = (function(){
     
     /**
      * Add the Time Dimension control into the map for one specific layer.
+     * Optionally, you may use the option to aggregate times when walking through the timeline of a Layer.
      * 
-     * @param {string} layerName 
+     * @param {string} layerName The layer name to enable the Time Dimension tool over the map.
+     * @param {boolen} aggregateTimes The control parameter to set the time aggregate option.
      */
-    let addTimerControl = function(layerName) {
+    let addTimerControl = function(layerName, aggregateTimes) {
     
         if(!_ctrlTimer.timeDimension){
-            _ctrlTimer.timeDimension = new L.TimeDimension();
+            let tdOptions={
+                aggregateTimes:aggregateTimes
+            };
+            _ctrlTimer.timeDimension = new L.TimeDimension(tdOptions);
         }
         
         var options={
