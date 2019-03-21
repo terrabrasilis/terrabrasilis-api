@@ -672,7 +672,7 @@ var Terrabrasilis = (function(){
         
         // updates a div info
         info.update = function (props) {
-            this._div.innerHTML = (props ? '<b>' + props.name + '</b><br/>' + props.density.toFixed(2): 'Hover over a feature');
+            this._div.innerHTML = (props ? '<b>' + props.name + '</b><br/>' + props.density.toFixed(2): '');
         };
 
     }
@@ -726,8 +726,9 @@ var Terrabrasilis = (function(){
         var div = L.DomUtil.create('div', 'info legend'); // create a div
     
         // loop through grades intervals and generate a label with a colored square for each interval
+        div.innerHTML += '<b>Interval. Min - Max (km²) </b><br>';
         for (var i = 0; i < grades.length; i++) {
-            div.innerHTML += '<i style="background:' + colors[i] + '"></i> ' + grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+            div.innerHTML += '<i style="background:' + colors[i] + '"></i> ' + grades[i] + (grades[i + 1] ? ' &ndash; ' + grades[i + 1] + '' : '+');
         }
     
         return div;
