@@ -729,9 +729,9 @@ var Terrabrasilis = (function(){
         var div = L.DomUtil.create('div', 'info legend'); // create a div
     
         // loop through grades intervals and generate a label with a colored square for each interval
-        div.innerHTML += '<b>Interval. Min &ndash; Max (km²) </b><br>';
+        div.innerHTML += '<b>Min &ndash; Max (km²)</b><br>';
         for (var i = 0; i < grades.length; i++) {
-            div.innerHTML += '<i style="background:' + colors[i] + '"></i> ' + grades[i] + (grades[i + 1] ? ' &ndash; ' + grades[i + 1] + '<br>' : ' &ndash; Inf ');
+            div.innerHTML += '<i style="background:' + colors[i] + '"></i> ' + grades[i] + (grades[i + 1] ? ' &ndash; ' + grades[i + 1] + '<br>' : '+');
         }
     
         return div;
