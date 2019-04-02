@@ -220,7 +220,7 @@ var Terrabrasilis = (function(){
                     //console.log(options);
                     let host = bl.datasource == null ? '' : bl.datasource.host;
                     var baselayer = L.tileLayer(host, options);               
-                    baselayers[bl.title] = baselayer;
+                    baselayers[bl.title] = baselayer;                    
                 }
             }                      
         };        
@@ -445,7 +445,8 @@ var Terrabrasilis = (function(){
                         }                        
                     }
                     var overlayer = L.tileLayer.wms(ol.host, options);                
-                    overlayers[ol.title] = overlayer;
+                    //overlayers[ol.title] = overlayer;
+                    overlayers[ol.id] = overlayer;
 
                     legend.addLegend({
                         name: ol.title,
@@ -473,7 +474,8 @@ var Terrabrasilis = (function(){
             if (overLayersOptions.hasOwnProperty(key)) {
                 const toShow = overLayersOptions[key];
                 if (toShow.active) {
-                    overlayers[toShow.title].addTo(map);
+                    //overlayers[toShow.title].addTo(map);
+                    overlayers[toShow.id].addTo(map);
                 }                
             }
         }
@@ -530,7 +532,7 @@ var Terrabrasilis = (function(){
     */
     let mountCustomizedOverLayers = function(overLayersOptions) {
         let overlayers = {};
-
+        
         if(typeof(overLayersOptions) == 'undefined' || overLayersOptions === null) {
             overlayers = null;
             //console.log("no objects defined to mount overlayers!")
@@ -566,11 +568,13 @@ var Terrabrasilis = (function(){
                     
                     let host = ol.datasource.host.replace("ows", "gwc/service/wms");
                     var overlayer = L.tileLayer.wms(host, options);                
-                    overlayers[ol.title] = overlayer;
+                    //overlayers[ol.title] = overlayer;
+                    overlayers[ol.id] = overlayer;
                     if(ol.timeDimension) {
                         // Show one button to enable/disable the TimerControl over map.
                         console.log("The layer "+ol.name+" have time dimension.");
-                        _timeConfigLayers[ol.title] = ol;
+                        //_timeConfigLayers[ol.title] = ol;
+                        _timeConfigLayers[ol.id] = ol;
                     }
                 } 
             }                
@@ -580,7 +584,8 @@ var Terrabrasilis = (function(){
             if (overLayersOptions.hasOwnProperty(key)) {
                 const toShow = overLayersOptions[key];
                 if (toShow.active) {
-                    overlayers[toShow.title].addTo(map);
+                    //overlayers[toShow.title].addTo(map);
+                    overlayers[toShow.id].addTo(map);
                 }                
             }
         }
