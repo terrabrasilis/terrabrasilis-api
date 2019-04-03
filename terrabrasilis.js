@@ -85,15 +85,15 @@ var Terrabrasilis = (function(){
             contextmenuWidth: 200,
             contextmenuItems: [{
                 text: 'Show coordinates',
-                icon: '../../../../assets/img/leaflet/context.menu/whereiam.png',
+                icon: 'http://terrabrasilis.dpi.inpe.br/map/assets/img/leaflet/context.menu/whereiam.png',
                 callback: showCoordinates
             }, {
                 text: 'Center map here',
-                icon: '../../../../assets/img/leaflet/context.menu/center.png',
+                icon: 'http://terrabrasilis.dpi.inpe.br/map/assets/img/leaflet/context.menu/center.png',
                 callback: centerMap 
             }, '-', {
                 text: 'GetFeatureInfo',
-                icon: '../../../../assets/img/leaflet/context.menu/info.png',
+                icon: 'http://terrabrasilis.dpi.inpe.br/map/assets/img/leaflet/context.menu/info.png',
                 callback: getLayerFeatureInfo
             }]
         }).setView([lon, lat], zoom);
@@ -1784,17 +1784,23 @@ var Terrabrasilis = (function(){
     /**
      * Enable loading to body
      */
-    let enableLoading = function() {
+    let enableLoading = function(dom) {
         console.log("Enable loading");
-        $("body").loading();
+        
+        if(typeof(dom) == 'undefined' || dom === null) dom = "body";
+
+        $(dom).loading();        
     } 
 
     /**
      * Disable loading to body
      */
-    let disableLoading = function() {
+    let disableLoading = function(dom) {
         console.log("Disable loading");
-        $('body').loading('stop');
+
+        if(typeof(dom) == 'undefined' || dom === null) dom = "body";
+
+        $(dom).loading('stop');
     } 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
