@@ -85,15 +85,15 @@ var Terrabrasilis = (function(){
             contextmenuWidth: 200,
             contextmenuItems: [{
                 text: 'Show coordinates',
-                icon: 'http://terrabrasilis.dpi.inpe.br/map/assets/img/leaflet/context.menu/whereiam.png',
+                icon: 'assets/img/leaflet/context.menu/whereiam.png',
                 callback: showCoordinates
             }, {
                 text: 'Center map here',
-                icon: 'http://terrabrasilis.dpi.inpe.br/map/assets/img/leaflet/context.menu/center.png',
+                icon: 'assets/img/leaflet/context.menu/center.png',
                 callback: centerMap 
             }, '-', {
                 text: 'GetFeatureInfo',
-                icon: 'http://terrabrasilis.dpi.inpe.br/map/assets/img/leaflet/context.menu/info.png',
+                icon: 'assets/img/leaflet/context.menu/info.png',
                 callback: getLayerFeatureInfo
             }]
         }).setView([lon, lat], zoom);
@@ -1099,12 +1099,12 @@ var Terrabrasilis = (function(){
 
         // Define default icons to instruct the webpack to copy this icon files from assets to bundle.
         var tbIcon = L.icon({
-            iconUrl: '../../../../assets/img/leaflet/marker-icon.png',
-            iconRetinaUrl: '../../../../assets/img/leaflet/marker-icon-2x.png',
+            iconUrl: 'assets/img/leaflet/marker-icon.png',
+            iconRetinaUrl: 'assets/img/leaflet/marker-icon-2x.png',
             iconSize: [25, 41],
             iconAnchor: [12.5, 41],
             popupAnchor: [-1, -41],
-            shadowUrl: '../../../../assets/img/leaflet/marker-shadow.png',
+            shadowUrl: 'assets/img/leaflet/marker-shadow.png',
             shadowSize: [41, 41],
             shadowAnchor: [12.5, 41]
         });
