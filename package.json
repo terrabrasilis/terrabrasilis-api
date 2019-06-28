@@ -1,10 +1,13 @@
 {
   "name": "terrabrasilis-api",
-  "version": "0.0.29",
+  "version": "0.2.0",
   "description": "API to build map and enable tools to use in Terrabrasilis webmap application",
   "main": "terrabrasilis.js",
   "scripts": {
-    "test": "echo \"Msg: Building without test yet.\""
+    "test": "echo \"Msg: Building without test yet.\"",
+    "preversion": "npm test",
+    "version": "git add .",
+    "postversion": "git push && git push --tags && npm publish"
   },
   "repository": {
     "type": "git",
