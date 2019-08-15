@@ -106,7 +106,7 @@ var Terrabrasilis = (function () {
     redoScaleQueue = Queue
 
     map.on('zoomend', function (event) {
-      options = {
+      const options = {
         lat: localStorage.getItem('lat'),
         lng: localStorage.getItem('lon'),
         zoom: map.getZoom()
@@ -203,7 +203,7 @@ var Terrabrasilis = (function () {
       return this
     }
 
-    for (key in baseLayersOptions) {
+    for (const key in baseLayersOptions) {
       if (baseLayersOptions.hasOwnProperty(key)) {
         const bl = baseLayersOptions[key]
 
@@ -430,7 +430,7 @@ var Terrabrasilis = (function () {
             layers: ol.workspace + ':' + ol.name,
             format: 'image/png',
             transparent: true,
-                        tiled: true,
+            tiled: true,
             _name: ol.name,
             _baselayer: ol.baselayer,
             zIndex: zIndexCount++
@@ -551,7 +551,7 @@ var Terrabrasilis = (function () {
             layers: ol.workspace + ':' + ol.name,
             format: 'image/png',
             transparent: true,
-                        tiled: true,
+            tiled: true,
             _name: ol.name,
             _baselayer: ol.baselayer,
             zIndex: ol.stackOrder
@@ -1804,7 +1804,7 @@ var Terrabrasilis = (function () {
   /* The end of the Time Dimension support methods. */
 
   const resizeMap = function () {
-        map.invalidateSize()
+    map.invalidateSize()
   }
 
   const checkMap = function () {
