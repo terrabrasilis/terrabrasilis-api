@@ -2,14 +2,15 @@ const { Stack, Queue } = require('terrabrasilis-util')
 const L = require('leaflet')
 require('terrabrasilis-timedimension')
 require('terrabrasilis-map-plugins')
-var leafletEsriGeocoding = require('esri-leaflet-geocoder')
+const leafletEsriGeocoding = require('esri-leaflet-geocoder')
 
 /**
  * This class use the Revealing Module Pattern.
  *
  * https://scotch.io/bar-talk/4-javascript-design-patterns-you-should-know#module-design-pattern
  */
-var Terrabrasilis = (function () {
+var Terrabrasilis
+Terrabrasilis = (function () {
   /**
      * variables
      */
@@ -219,7 +220,7 @@ var Terrabrasilis = (function () {
             options.subdomains = bl.subdomains
           }
           // console.log(options);
-          const host = bl.datasource == null ? '' : bl.datasource.host
+          const host = bl.datasource === null ? '' : bl.datasource.host
           var baselayer = L.tileLayer(host, options)
           baselayers[bl.title] = baselayer
         }
@@ -313,7 +314,7 @@ var Terrabrasilis = (function () {
       return this
     }
 
-    for (key in baseLayersOptions) {
+    for (const key in baseLayersOptions) {
       if (baseLayersOptions.hasOwnProperty(key)) {
         const bl = baseLayersOptions[key]
 
@@ -329,7 +330,7 @@ var Terrabrasilis = (function () {
             options.subdomains = bl.subdomains
           }
           // console.log(options);
-          const host = bl.datasource == null ? '' : bl.datasource.host
+          const host = bl.datasource === null ? '' : bl.datasource.host
           var baselayer = L.tileLayer(host, options)
           baselayer.setZIndex(0)
           baselayers[bl.title] = baselayer
@@ -898,7 +899,7 @@ var Terrabrasilis = (function () {
     }
 
     map.on(L.Draw.Event.CREATED, function (event) {
-      const type = event.layerType
+      // const type = event.layerType
       const layer = event.layer
       // console.log(type);
       // console.log(JSON.stringify(layer.toGeoJSON()));
@@ -906,15 +907,15 @@ var Terrabrasilis = (function () {
       drawnItems.addLayer(layer)
     })
 
-    map.on(L.Draw.Event.EDITED, function (event) {
-      const editedLayers = event.layers
-      editedLayers.eachLayer(function (l) {
-        const layer = event.layer
-        // console.log(JSON.stringify(layer.toGeoJSON()));
-        // let wkt = getTerraformerWKT(l);
-        // console.log(wkt);
-      })
-    })
+    // map.on(L.Draw.Event.EDITED, function (event) {
+    //   const editedLayers = event.layers
+    // editedLayers.eachLayer(function (l) {
+    // const layer = event.layer
+    // console.log(JSON.stringify(layer.toGeoJSON()));
+    // let wkt = getTerraformerWKT(l);
+    // console.log(wkt);
+    // })
+    // })
 
     map.on(L.Draw.Event.DELETED, function (event) {
       const deletedLayers = event.layers
@@ -1047,9 +1048,9 @@ var Terrabrasilis = (function () {
      *
      * @param layer
      */
-  const getTerraformerWKT = function (layer) {
-    return Terraformer.WKT.convert(layer.toGeoJSON().geometry)
-  }
+  // const getTerraformerWKT = function (layer) {
+  //   return Terraformer.WKT.convert(layer.toGeoJSON().geometry)
+  // }
 
   /**
      * This method show the lat lon - just test with context menu
@@ -1242,7 +1243,7 @@ var Terrabrasilis = (function () {
       const match = /gwc\/service/
       const hasReplication = function (lName) {
         ctrlReplication.some(function (l) {
-          if (l == lName) {
+          if (l === lName) {
             return true
           }
         })
@@ -1251,7 +1252,7 @@ var Terrabrasilis = (function () {
 
       if (layer.options.layers && !hasReplication(layer.options.layers)) {
         ctrlReplication.push(layer.options.layers)
-        defaultParams = {
+        var defaultParams = {
           request: 'GetFeatureInfo',
           service: 'WMS',
           version: layer.wmsParams.version,
@@ -1263,16 +1264,16 @@ var Terrabrasilis = (function () {
           typename: layer.wmsParams.layers
         }
 
-        paramsOptions = {
+        var paramsOptions = {
           info_format: 'application/json'
         }
 
-        params = L.Util.extend(defaultParams, paramsOptions || {})
+        var params = L.Util.extend(defaultParams, paramsOptions || {})
 
         params[params.version === '1.3.0' ? 'i' : 'x'] = point.x
         params[params.version === '1.3.0' ? 'j' : 'y'] = point.y
 
-        const url = match.test(layer._url) == true
+        const url = match.test(layer._url) === true
           ? layer._url.replace('gwc/service', layer.wmsParams.layers.split(':')[0]) : layer._url
         result.push(url + L.Util.getParamString(params, url, true))
       }
@@ -1327,7 +1328,7 @@ var Terrabrasilis = (function () {
       return false
     }
     // if time dimension is enabled for this layer, remove it.
-    if (layer.name == _ctrlTimer.layerName) {
+    if (layer.name === _ctrlTimer.layerName) {
       removeTimerControl()
     }
     const ll = getLayerByName(layer.name)
@@ -1346,7 +1347,7 @@ var Terrabrasilis = (function () {
       // console.log("layer must not be null!");
       return this
     }
-    const layers = new Array()
+    const layers = []
     layer.active = true
     layers.push(layer)
 
@@ -1381,7 +1382,7 @@ var Terrabrasilis = (function () {
      * This method receives a layer and move to back from others layers
      */
   const moveLayerToFront = function (layer, value) {
-    const layersOnMap = new Array()
+    const layersOnMap = []
     const layers = Object.values(layerControl._map._layers)
     for (let index = 0; index < layers.length; index++) {
       const element = layers[index]
@@ -1420,7 +1421,7 @@ var Terrabrasilis = (function () {
      * This method receives a layer and move to from from others layers
      */
   const moveLayerToBack = function (layer, value) {
-    const layersOnMap = new Array()
+    const layersOnMap = []
     const layers = Object.values(layerControl._map._layers)
     for (let index = 0; index < layers.length; index++) {
       const element = layers[index]
@@ -1503,7 +1504,7 @@ var Terrabrasilis = (function () {
      * @param {*} layerOptions
      */
   const addLayerByGetCapabilities = function (layerOptions, customized) {
-    if (layerOptions === 'undefined' || layerOptions == null || layerOptions === '') {
+    if (layerOptions === 'undefined' || layerOptions === null || layerOptions === '') {
       alert('No data to add layer on the map!')
       return
     }
@@ -1544,7 +1545,7 @@ var Terrabrasilis = (function () {
         }]
       })
 
-      groupLayer = {
+      var groupLayer = {
         groupName: 'BY GETCAPABILITIES'
       }
 
@@ -1671,7 +1672,7 @@ var Terrabrasilis = (function () {
      * @param {boolean} aggregateTimes The control parameter to set the time aggregate option. Default is false.
      */
   const onOffTimeDimension = function (layerName, aggregateTimes = false) {
-    const isNewLayer = _ctrlTimer.layerName != layerName
+    const isNewLayer = _ctrlTimer.layerName !== layerName
     removeTimerControl()
     if (isNewLayer) addTimerControl(layerName, aggregateTimes)
   }
@@ -1789,10 +1790,10 @@ var Terrabrasilis = (function () {
         layerName = layerName.split(':')[1]
       }
 
-      for (key in _timeConfigLayers) {
+      for (const key in _timeConfigLayers) {
         if (_timeConfigLayers.hasOwnProperty(key)) {
           const layer = _timeConfigLayers[key]
-          if (layer.name == layerName) {
+          if (layer.name === layerName) {
             return layer
           }
         }
@@ -1808,7 +1809,7 @@ var Terrabrasilis = (function () {
   }
 
   const checkMap = function () {
-    return !(map == undefined || map == null)
+    return !(map === undefined || map === null)
   }
 
   const removeMap = function () {
