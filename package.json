@@ -27,7 +27,7 @@
     "standard": "^13.1.0",
     "terrabrasilis-map-plugins": "latest",
     "terrabrasilis-timedimension": "latest",
-    "terrabrasilis-util": "latest"
+    "terrabrasilis-util": "terrabrasilis/terrabrasilis-util#master"
   },
   "devDependencies": {
     "eslint": "^6.1.0",
