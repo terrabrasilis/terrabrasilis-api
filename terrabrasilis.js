@@ -3,6 +3,7 @@ const L = require('leaflet')
 require('terrabrasilis-timedimension')
 require('terrabrasilis-map-plugins')
 const leafletEsriGeocoding = require('esri-leaflet-geocoder')
+const utils = require('./src/utils')
 
 /**
  * This class use the Revealing Module Pattern.
@@ -1838,6 +1839,13 @@ Terrabrasilis = (function () {
     $(dom).loading('stop')
   }
 
+
+  const fitBounds = function (layerMetada) {
+    return utils.getBounds(layerMetada).then((bounds) => {
+      map.fitBounds(bounds)
+    })
+  }
+
   /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // return
   /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1895,6 +1903,7 @@ Terrabrasilis = (function () {
     addShowCoordinatesEventToMap: addShowCoordinatesEventToMap,
     enableLoading: enableLoading,
     disableLoading: disableLoading,
+    fitBounds: fitBounds,
 
     /* TimeDimension tool */
     onOffTimeDimension: onOffTimeDimension
