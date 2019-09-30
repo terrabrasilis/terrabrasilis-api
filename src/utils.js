@@ -65,13 +65,11 @@ const Utils = {
   },
 
   splitBounds(layer) {
-    const bounds = find(get(layer, 'BoundingBox', []), (searchBounds) => searchBounds._attributes.CRS === 'EPSG:4674')
-
+    const bounds = get(layer, 'EX_GeographicBoundingBox', [])
     if (bounds) {
-      const attributes = bounds._attributes
       return [
-        [attributes.minx, attributes.miny],
-        [attributes.maxx, attributes.maxy]
+        [bounds.southBoundLatitude._text, bounds.westBoundLongitude._text],
+        [bounds.northBoundLatitude._text, bounds.eastBoundLongitude._text]
       ]
     }
   },
