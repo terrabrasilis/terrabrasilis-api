@@ -1,0 +1,102 @@
+{
+    "id": "5c9bcc136d9f9d00010068c05c9bd04ae2e106099a3fd5ee",
+    "name": "accumulated_deforestation_1988_2007_biome",
+    "title": "Accumulated Biome Deforestation - 1988/2007",
+    "description": "",
+    "attribution": "",
+    "workspace": "prodes-amz",
+    "capabilitiesUrl": "REQUEST=GetCapabilities&VERSION=1.3.0&SERVICE=wms",
+    "opacity": 1,
+    "baselayer": false,
+    "active": true,
+    "enable": true,
+    "created": "",
+    "timeDimension": false,
+    "datasource":
+    {
+        "id": "5c9923e96d00c5383fbc6552",
+        "name": "Prodes Amazônia",
+        "description": "Prodes Amazônia",
+        "host": "http://terrabrasilis.dpi.inpe.br/geoserver/ows",
+        "metadata": "",
+        "enabled": true,
+        "type": "OWS",
+        "created": "2019-03-25 18:54:00",
+        "downloads": [],
+        "tools": []
+    },
+    "tools": [
+    {
+        "id": "5c5d6293c4267d000128431d",
+        "name": "Basic Layer Info",
+        "description": "This tool allow to see the basic info about layer",
+        "tag": "BasicInfoToolComponent",
+        "target": "<app-basic-info-tool [shared]=\"layer\"></app-basic-info-tool>",
+        "enabled": true,
+        "created": "2019-02-08 11:05:55"
+    },
+    {
+        "id": "5c5dc4a1c4267d0001284323",
+        "name": "Time Dimension Layer",
+        "description": "This tool allow to see the time dimension of layer",
+        "tag": "TimeDimensionComponent",
+        "target": "<app-time-dimension [shared]=\"layer\"></app-time-dimension>",
+        "enabled": true,
+        "created": "2019-02-08 18:04:17"
+    },
+    {
+        "id": "5c5d6293c4267d0001284320",
+        "name": "Metadata to Layer",
+        "description": "This tool allow perform got to the metadata of layer",
+        "tag": "LayerMetadataToolComponent",
+        "target": "<app-layer-metadata-tool [shared]=\"layer\"></app-layer-metadata-tool>",
+        "enabled": true,
+        "created": "2019-02-08 11:05:55"
+    },
+    {
+        "id": "5c5476e9e16438142572c47f",
+        "name": "Transparency",
+        "description": "This tool allow increase and decrease the layer transparency",
+        "tag": "TransparencyToolComponent",
+        "target": "<app-transparency-tool [shared]=\"layer\"></app-transparency-tool>",
+        "enabled": true,
+        "created": "2019-02-01 16:42:16"
+    },
+    {
+        "id": "5c5d6293c4267d000128431f",
+        "name": "Download Data",
+        "description": "This tool allow perform download data",
+        "tag": "LayerDownloadToolComponent",
+        "target": "<app-layer-download-tool [shared]=\"layer\"></app-layer-download-tool>",
+        "enabled": true,
+        "created": "2019-02-08 11:05:55"
+    },
+    {
+        "id": "5c5d6293c4267d000128431e",
+        "name": "Remove Layer",
+        "description": "This tool allow to remove layer",
+        "tag": "LayerRemoveToolComponent",
+        "target": "<app-layer-remove-tool [shared]=\"layer\"></app-layer-remove-tool>",
+        "enabled": true,
+        "created": "2019-02-08 11:05:55"
+    },
+    {
+        "id": "5c5d6293c4267d000128431a",
+        "name": "Fit Layer Bounds",
+        "description": "Center the map based on the bounds of this layer",
+        "tag": "LayerFitBoundsToolComponent",
+        "target": "<fit-bounds-tool [shared]=\"layer\"></fit-bounds-tool>",
+        "enabled": true,
+        "created": "2019-02-08 11:05:55"
+    }],
+    "subdomains": [],
+    "downloads": [],
+    "metadata": "http://terrabrasilis.dpi.inpe.br/geonetwork/srv/eng/catalog.search#/metadata/c6748fdf-a18e-41b9-a523-ea14bae92602",
+    "dashboard": null,
+    "thirdHost": "",
+    "uiOrder": 0,
+    "stackOrder": 408,
+    "isRemovable": false,
+    "hasTranslate": true,
+    "isAggregatable": false
+}
