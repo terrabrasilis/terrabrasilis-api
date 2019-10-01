@@ -5,10 +5,7 @@
   "main": "terrabrasilis.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha",
-    "test:watch": "./node_modules/mocha/bin/mocha --watch",
-    "preversion": "npm test",
-    "version": "git add .",
-    "postversion": "git push && git push --tags && npm publish"
+    "test:watch": "./node_modules/mocha/bin/mocha --watch"
   },
   "repository": {
     "type": "git",
@@ -29,12 +26,16 @@
     "lodash": "^4.17.15",
     "terrabrasilis-map-plugins": "terrabrasilis/terrabrasilis-map-plugins#master",
     "terrabrasilis-timedimension": "terrabrasilis/terrabrasilis-timedimension#master",
-    "terrabrasilis-util": "terrabrasilis/terrabrasilis-util#master",
-    "xml-js": "^1.6.11"
+    "terrabrasilis-util": "terrabrasilis/terrabrasilis-util#master"
   },
   "devDependencies": {
     "chai": "^4.2.0",
+    "http-server": "^0.10.0",
+    "jsdom": "^15.1.1",
+    "jsdom-global": "^3.0.2",
     "mocha": "^6.2.0",
-    "sinon": "^7.5.0"
+    "script-loader": "^0.7.2",
+    "sinon": "^7.5.0",
+    "webpack": "^3.10.0"
   }
 }

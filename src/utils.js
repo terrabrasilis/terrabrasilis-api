@@ -1,6 +1,6 @@
 const { get, find } = require('lodash')
 const axios = require('axios')
-const convert = require('xml-js')
+const {xmlToJson} = require('./xmlToJson')
 
 const Utils = {
   /*
@@ -43,22 +43,13 @@ const Utils = {
         }
     ]
     */
-  // getBounds: async (layerConfig) => {
-  //   const url = Utils.configureUrlWorkspace(layerConfig)
-  //   const xmlResult = await axios.get(url)
-  //   const jsonResult = Utils.parseXML(xmlResult)
-  //   const layers = get(jsonResult, 'WMS_Capabilities.Capability.Layer.Layer', [])
-  //   const layer = find(layers, (searchLayer) => get(searchLayer, 'Name._text') === layerConfig.name)
-  //   return Utils.splitBounds(layer)
-  // },
-
   getBounds: (layerConfig) => {
     return new Promise((resolve, reject) => {
       const url = Utils.configureUrlWorkspace(layerConfig)
       axios.get(url).then((xmlResult) => {
         const jsonResult = Utils.parseXML(xmlResult)
         const layers = get(jsonResult, 'WMS_Capabilities.Capability.Layer.Layer', [])
-        const layer = find(layers, (searchLayer) => get(searchLayer, 'Name._text') === layerConfig.name)
+        const layer = find(layers, (searchLayer) => get(searchLayer, 'Name') === layerConfig.name)
         resolve(Utils.splitBounds(layer))
       })
     })
@@ -68,8 +59,8 @@ const Utils = {
     const bounds = get(layer, 'EX_GeographicBoundingBox', [])
     if (bounds) {
       return [
-        [bounds.southBoundLatitude._text, bounds.westBoundLongitude._text],
-        [bounds.northBoundLatitude._text, bounds.eastBoundLongitude._text]
+        [bounds.southBoundLatitude, bounds.westBoundLongitude],
+        [bounds.northBoundLatitude, bounds.eastBoundLongitude]
       ]
     }
   },
@@ -80,8 +71,9 @@ const Utils = {
     return baseUrl
   },
 
-  parseXML: (xmlContent) => {
-    const result = convert.xml2js(xmlContent, { compact: true })
+  parseXML: (xmlString) => {
+    const xmlNode = new DOMParser().parseFromString(xmlString, 'text/xml')
+    const result = xmlToJson(xmlNode)
     return result
   }
 }

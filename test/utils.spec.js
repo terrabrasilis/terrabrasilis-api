@@ -1,3 +1,6 @@
+require('jsdom-global')()
+global.DOMParser = window.DOMParser
+
 const utils = require('../src/utils')
 const assert = require('assert')
 const path = require('path')
@@ -22,7 +25,7 @@ describe('UTILS', () => {
     it('.parseXML', () => {
       const xmlCapabilitiesFixture = fs.readFileSync(path.join(__dirname, 'fixtures/capabilities-example.xml'), 'utf-8')
       const result = utils.parseXML(xmlCapabilitiesFixture)
-      assert.equal(result._declaration._attributes.version, '1.0')
+      assert.equal(result['WMS_Capabilities']['@attributes']['version'], '1.3.0')
     })
 
     it('.getBounds', async () => {
@@ -38,18 +41,10 @@ describe('UTILS', () => {
     it('.splitBounds', () => {
       const boundingBoxExample = {
         EX_GeographicBoundingBox: {
-          westBoundLongitude: {
-            _text: '-73.9909438636055'
-          },
-          eastBoundLongitude: {
-            _text: '-43.0169133104806'
-          },
-          southBoundLatitude: {
-            _text: '-16.290519038121'
-          },
-          northBoundLatitude: {
-            _text: '5.27215639335258'
-          }
+          westBoundLongitude:'-73.9909438636055',
+          eastBoundLongitude:'-43.0169133104806',
+          southBoundLatitude:'-16.290519038121',
+          northBoundLatitude:'5.27215639335258'
         }
       }
 
