@@ -48,8 +48,7 @@ const Utils = {
       const url = Utils.configureUrlWorkspace(layerConfig)
       axios.get(url).then((xmlResult) => {
         const jsonResult = Utils.parseXML(xmlResult.data)
-        const layers = get(jsonResult, 'WMS_Capabilities.Capability.Layer.Layer', [])
-        const layer = find(layers, (searchLayer) => get(searchLayer, 'Name') === layerConfig.name)
+        const layer = get(jsonResult, 'WMS_Capabilities.Capability.Layer', [])
         resolve(Utils.splitBounds(layer))
       })
     })

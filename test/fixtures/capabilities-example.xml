@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><WMS_Capabilities version="1.3.0" updateSequence="2053" xmlns="http://www.opengis.net/wms" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wms http://terrabrasilis.dpi.inpe.br:80/geoserver/schemas/wms/1.3.0/capabilities_1_3_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?><WMS_Capabilities version="1.3.0" updateSequence="2061" xmlns="http://www.opengis.net/wms" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wms http://terrabrasilis.dpi.inpe.br:80/geoserver/schemas/wms/1.3.0/capabilities_1_3_0.xsd">
   <Service>
     <Name>WMS</Name>
     <Title>Geoservices TerraBrasilis</Title>
@@ -40,10 +40,10 @@
         <DCPType>
           <HTTP>
             <Get>
-              <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/ows?SERVICE=WMS&amp;"/>
+              <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/accumulated_deforestation_1988_2007_biome/ows?SERVICE=WMS&amp;"/>
             </Get>
             <Post>
-              <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/ows?SERVICE=WMS&amp;"/>
+              <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/accumulated_deforestation_1988_2007_biome/ows?SERVICE=WMS&amp;"/>
             </Post>
           </HTTP>
         </DCPType>
@@ -72,7 +72,7 @@
         <DCPType>
           <HTTP>
             <Get>
-              <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/ows?SERVICE=WMS&amp;"/>
+              <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/accumulated_deforestation_1988_2007_biome/ows?SERVICE=WMS&amp;"/>
             </Get>
           </HTTP>
         </DCPType>
@@ -88,7 +88,7 @@
         <DCPType>
           <HTTP>
             <Get>
-              <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/ows?SERVICE=WMS&amp;"/>
+              <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/accumulated_deforestation_1988_2007_biome/ows?SERVICE=WMS&amp;"/>
             </Get>
           </HTTP>
         </DCPType>
@@ -5953,12 +5953,12 @@
       <CRS>EPSG:42303</CRS>
       <CRS>CRS:84</CRS>
       <EX_GeographicBoundingBox>
-        <westBoundLongitude>-73.9909438636055</westBoundLongitude>
-        <eastBoundLongitude>-43.0169133104806</eastBoundLongitude>
-        <southBoundLatitude>-16.290519038121</southBoundLatitude>
-        <northBoundLatitude>5.27215639335258</northBoundLatitude>
+        <westBoundLongitude>-73.8538648282111</westBoundLongitude>
+        <eastBoundLongitude>-44.0</eastBoundLongitude>
+        <southBoundLatitude>-16.2779683090209</southBoundLatitude>
+        <northBoundLatitude>5.20548191938395</northBoundLatitude>
       </EX_GeographicBoundingBox>
-      <BoundingBox CRS="CRS:84" minx="-73.9909438636055" miny="-16.290519038121" maxx="-43.0169133104806" maxy="5.27215639335258"/>
+      <BoundingBox CRS="CRS:84" minx="-73.8538648282111" miny="-16.2779683090209" maxx="-44.0" maxy="5.20548191938395"/>
       <AuthorityURL name="OBT">
         <OnlineResource xlink:type="simple" xlink:href="http://www.obt.inpe.br/"/>
       </AuthorityURL>
@@ -5989,359 +5989,7 @@
           <Title>Mask polygon style</Title>
           <LegendURL width="20" height="20">
             <Format>image/png</Format>
-            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/ows?service=WMS&amp;request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=accumulated_deforestation_1988_2007_biome"/>
-          </LegendURL>
-        </Style>
-      </Layer>
-      <Layer queryable="1" opaque="0">
-        <Name>accumulated_deforestation_1988_2012_biome</Name>
-        <Title>Accumulated Biome Deforestation - 1988/2012</Title>
-        <Abstract/>
-        <KeywordList>
-          <Keyword>features</Keyword>
-          <Keyword>accumulated_deforestation_1988_2012_biome</Keyword>
-        </KeywordList>
-        <CRS>EPSG:4674</CRS>
-        <CRS>CRS:84</CRS>
-        <EX_GeographicBoundingBox>
-          <westBoundLongitude>-73.8538648282111</westBoundLongitude>
-          <eastBoundLongitude>-44.0</eastBoundLongitude>
-          <southBoundLatitude>-16.2779683090209</southBoundLatitude>
-          <northBoundLatitude>5.20548191938395</northBoundLatitude>
-        </EX_GeographicBoundingBox>
-        <BoundingBox CRS="CRS:84" minx="-73.8538648282111" miny="-16.2779683090209" maxx="-44.0" maxy="5.20548191938395"/>
-        <BoundingBox CRS="EPSG:4674" minx="-16.2779683090209" miny="-73.8538648282111" maxx="5.20548191938395" maxy="-44.0"/>
-        <MetadataURL type="FGDC">
-          <Format>text/plain</Format>
-          <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br/geonetwork/srv/eng/catalog.search#/metadata/c6748fdf-a18e-41b9-a523-ea14bae92602"/>
-        </MetadataURL>
-        <Style>
-          <Name>terrabrasilis:mask</Name>
-          <Title>Mask polygon style</Title>
-          <LegendURL width="20" height="20">
-            <Format>image/png</Format>
-            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/ows?service=WMS&amp;request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=accumulated_deforestation_1988_2012_biome"/>
-          </LegendURL>
-        </Style>
-      </Layer>
-      <Layer queryable="1" opaque="0">
-        <Name>brazilian_amazon_biome_border</Name>
-        <Title>Brazilian Amazon Biome</Title>
-        <Abstract/>
-        <KeywordList>
-          <Keyword>features</Keyword>
-          <Keyword>amazon_biome</Keyword>
-        </KeywordList>
-        <CRS>EPSG:4674</CRS>
-        <CRS>CRS:84</CRS>
-        <EX_GeographicBoundingBox>
-          <westBoundLongitude>-73.9909438636055</westBoundLongitude>
-          <eastBoundLongitude>-43.0169133104806</eastBoundLongitude>
-          <southBoundLatitude>-16.290519038121</southBoundLatitude>
-          <northBoundLatitude>5.27215639335258</northBoundLatitude>
-        </EX_GeographicBoundingBox>
-        <BoundingBox CRS="CRS:84" minx="-73.9909438636055" miny="-16.290519038121" maxx="-43.0169133104806" maxy="5.27215639335258"/>
-        <BoundingBox CRS="EPSG:4674" minx="-16.290519038121" miny="-73.9909438636055" maxx="5.27215639335258" maxy="-43.0169133104806"/>
-        <MetadataURL type="FGDC">
-          <Format>text/plain</Format>
-          <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br/geonetwork/srv/eng/catalog.search#/metadata/662fdeaa-d0bc-4cd0-909c-0562ce3b5389"/>
-        </MetadataURL>
-        <Style>
-          <Name>terrabrasilis:simple_border</Name>
-          <Title>Simple border</Title>
-          <LegendURL width="20" height="20">
-            <Format>image/png</Format>
-            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/ows?service=WMS&amp;request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=brazilian_amazon_biome_border"/>
-          </LegendURL>
-        </Style>
-      </Layer>
-      <Layer queryable="1" opaque="0">
-        <Name>cloud_biome</Name>
-        <Title>Cloud - 2016/2018</Title>
-        <Abstract/>
-        <KeywordList>
-          <Keyword>features</Keyword>
-          <Keyword>cloud_biome</Keyword>
-        </KeywordList>
-        <CRS>EPSG:4674</CRS>
-        <CRS>CRS:84</CRS>
-        <EX_GeographicBoundingBox>
-          <westBoundLongitude>-73.9725646646282</westBoundLongitude>
-          <eastBoundLongitude>-44.0</eastBoundLongitude>
-          <southBoundLatitude>-15.172647297545</southBoundLatitude>
-          <northBoundLatitude>5.27149090870589</northBoundLatitude>
-        </EX_GeographicBoundingBox>
-        <BoundingBox CRS="CRS:84" minx="-73.9725646646282" miny="-15.172647297545" maxx="-44.0" maxy="5.27149090870589"/>
-        <BoundingBox CRS="EPSG:4674" minx="-15.172647297545" miny="-73.9725646646282" maxx="5.27149090870589" maxy="-44.0"/>
-        <Dimension name="time" default="2016-01-01T00:00:00.000Z" units="ISO8601">2016-01-01T00:00:00.000Z,2017-01-01T00:00:00.000Z,2018-01-01T00:00:00.000Z</Dimension>
-        <MetadataURL type="FGDC">
-          <Format>text/plain</Format>
-          <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br/geonetwork/srv/eng/catalog.search#/metadata/57087018-9cec-4eed-822c-c850b35e5242"/>
-        </MetadataURL>
-        <Style>
-          <Name>prodes-legal-amz:cloud</Name>
-          <Title>prodes-legal-amz:cloud</Title>
-          <LegendURL width="57" height="60">
-            <Format>image/png</Format>
-            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/ows?service=WMS&amp;request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=cloud_biome"/>
-          </LegendURL>
-        </Style>
-      </Layer>
-      <Layer queryable="1" opaque="0">
-        <Name>conservation_units_amazon_biome</Name>
-        <Title>Conservation Units Amazon Biome</Title>
-        <Abstract/>
-        <KeywordList>
-          <Keyword>features</Keyword>
-          <Keyword>conservation_units_amazon_biome</Keyword>
-        </KeywordList>
-        <CRS>EPSG:4674</CRS>
-        <CRS>CRS:84</CRS>
-        <EX_GeographicBoundingBox>
-          <westBoundLongitude>-73.9906792050059</westBoundLongitude>
-          <eastBoundLongitude>-43.0169133104806</eastBoundLongitude>
-          <southBoundLatitude>-16.1095123280516</southBoundLatitude>
-          <northBoundLatitude>5.27215639335258</northBoundLatitude>
-        </EX_GeographicBoundingBox>
-        <BoundingBox CRS="CRS:84" minx="-73.9906792050059" miny="-16.1095123280516" maxx="-43.0169133104806" maxy="5.27215639335258"/>
-        <BoundingBox CRS="EPSG:4674" minx="-16.1095123280516" miny="-73.9906792050059" maxx="5.27215639335258" maxy="-43.0169133104806"/>
-        <MetadataURL type="FGDC">
-          <Format>text/plain</Format>
-          <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br/geonetwork/srv/eng/catalog.search#/metadata/a46f7578-6ec2-40a8-88f3-64e0ccdea278"/>
-        </MetadataURL>
-        <Style>
-          <Name>prodes-amz:conservation_units_amazon_biome</Name>
-          <Title>Conservation units border</Title>
-          <LegendURL width="20" height="20">
-            <Format>image/png</Format>
-            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/ows?service=WMS&amp;request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=conservation_units_amazon_biome"/>
-          </LegendURL>
-        </Style>
-      </Layer>
-      <Layer queryable="1" opaque="0">
-        <Name>forest_biome</Name>
-        <Title>Forest - 2016/2018</Title>
-        <Abstract/>
-        <KeywordList>
-          <Keyword>features</Keyword>
-          <Keyword>forest_biome</Keyword>
-        </KeywordList>
-        <CRS>EPSG:4674</CRS>
-        <CRS>CRS:84</CRS>
-        <EX_GeographicBoundingBox>
-          <westBoundLongitude>-73.9783164486978</westBoundLongitude>
-          <eastBoundLongitude>-44.0</eastBoundLongitude>
-          <southBoundLatitude>-16.2860697422292</southBoundLatitude>
-          <northBoundLatitude>5.27149090870589</northBoundLatitude>
-        </EX_GeographicBoundingBox>
-        <BoundingBox CRS="CRS:84" minx="-73.9783164486978" miny="-16.2860697422292" maxx="-44.0" maxy="5.27149090870589"/>
-        <BoundingBox CRS="EPSG:4674" minx="-16.2860697422292" miny="-73.9783164486978" maxx="5.27149090870589" maxy="-44.0"/>
-        <Dimension name="time" default="2016-01-01T00:00:00.000Z" units="ISO8601">2016-01-01T00:00:00.000Z,2017-01-01T00:00:00.000Z,2018-01-01T00:00:00.000Z</Dimension>
-        <MetadataURL type="FGDC">
-          <Format>text/plain</Format>
-          <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br/geonetwork/srv/eng/catalog.search#/metadata/e7523c17-8570-4da6-ab41-f7fb62d7b86b"/>
-        </MetadataURL>
-        <Style>
-          <Name>prodes-legal-amz:forest</Name>
-          <Title>prodes-legal-amz:forest</Title>
-          <LegendURL width="57" height="60">
-            <Format>image/png</Format>
-            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/ows?service=WMS&amp;request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=forest_biome"/>
-          </LegendURL>
-        </Style>
-      </Layer>
-      <Layer queryable="1" opaque="0">
-        <Name>hydrography_biome</Name>
-        <Title>Hydrography</Title>
-        <Abstract/>
-        <KeywordList>
-          <Keyword>features</Keyword>
-          <Keyword>hydrography_biome</Keyword>
-        </KeywordList>
-        <CRS>EPSG:4674</CRS>
-        <CRS>CRS:84</CRS>
-        <EX_GeographicBoundingBox>
-          <westBoundLongitude>-73.2506438875477</westBoundLongitude>
-          <eastBoundLongitude>-44.0</eastBoundLongitude>
-          <southBoundLatitude>-16.029395019121</southBoundLatitude>
-          <northBoundLatitude>4.56095791980162</northBoundLatitude>
-        </EX_GeographicBoundingBox>
-        <BoundingBox CRS="CRS:84" minx="-73.2506438875477" miny="-16.029395019121" maxx="-44.0" maxy="4.56095791980162"/>
-        <BoundingBox CRS="EPSG:4674" minx="-16.029395019121" miny="-73.2506438875477" maxx="4.56095791980162" maxy="-44.0"/>
-        <MetadataURL type="FGDC">
-          <Format>text/plain</Format>
-          <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br/geonetwork/srv/eng/catalog.search#/metadata/1df78632-68e7-4e91-bca0-25305d3f831e"/>
-        </MetadataURL>
-        <Style>
-          <Name>terrabrasilis:hydrography</Name>
-          <Title>A hydrography polygon style</Title>
-          <LegendURL width="20" height="20">
-            <Format>image/png</Format>
-            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/ows?service=WMS&amp;request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=hydrography_biome"/>
-          </LegendURL>
-        </Style>
-      </Layer>
-      <Layer queryable="1" opaque="0">
-        <Name>indigeneous_area_amazon_biome</Name>
-        <Title>Indigeneous Area Amazon Biome</Title>
-        <Abstract/>
-        <KeywordList>
-          <Keyword>features</Keyword>
-          <Keyword>indigeneous_area_amazon_biome</Keyword>
-        </KeywordList>
-        <CRS>EPSG:4674</CRS>
-        <CRS>CRS:84</CRS>
-        <EX_GeographicBoundingBox>
-          <westBoundLongitude>-73.7251885753996</westBoundLongitude>
-          <eastBoundLongitude>-45.3952408798213</eastBoundLongitude>
-          <southBoundLatitude>-16.2749094225882</southBoundLatitude>
-          <northBoundLatitude>5.27212443824354</northBoundLatitude>
-        </EX_GeographicBoundingBox>
-        <BoundingBox CRS="CRS:84" minx="-73.7251885753996" miny="-16.2749094225882" maxx="-45.3952408798213" maxy="5.27212443824354"/>
-        <BoundingBox CRS="EPSG:4674" minx="-16.2749094225882" miny="-73.7251885753996" maxx="5.27212443824354" maxy="-45.3952408798213"/>
-        <MetadataURL type="FGDC">
-          <Format>text/plain</Format>
-          <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br/geonetwork/srv/eng/catalog.search#/metadata/22e49b94-4392-4cb2-b509-5d96e45d44df"/>
-        </MetadataURL>
-        <Style>
-          <Name>prodes-amz:indigeneous_area_amazon_biome</Name>
-          <Title>Indigeneous area</Title>
-          <LegendURL width="20" height="20">
-            <Format>image/png</Format>
-            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/ows?service=WMS&amp;request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=indigeneous_area_amazon_biome"/>
-          </LegendURL>
-        </Style>
-      </Layer>
-      <Layer queryable="1" opaque="0">
-        <Name>municipalities_amazon_biome</Name>
-        <Title>Municipalities  Amazon Biome</Title>
-        <Abstract/>
-        <KeywordList>
-          <Keyword>features</Keyword>
-          <Keyword>municipalities_amazon_biome</Keyword>
-        </KeywordList>
-        <CRS>EPSG:4674</CRS>
-        <CRS>CRS:84</CRS>
-        <EX_GeographicBoundingBox>
-          <westBoundLongitude>-73.990449969</westBoundLongitude>
-          <eastBoundLongitude>-43.0177679407526</eastBoundLongitude>
-          <southBoundLatitude>-16.290519038121</southBoundLatitude>
-          <northBoundLatitude>5.27184107717297</northBoundLatitude>
-        </EX_GeographicBoundingBox>
-        <BoundingBox CRS="CRS:84" minx="-73.990449969" miny="-16.290519038121" maxx="-43.0177679407526" maxy="5.27184107717297"/>
-        <BoundingBox CRS="EPSG:4674" minx="-16.290519038121" miny="-73.990449969" maxx="5.27184107717297" maxy="-43.0177679407526"/>
-        <MetadataURL type="ISO19115:2003">
-          <Format>text/plain</Format>
-          <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br/geonetwork/srv/eng/catalog.search#/metadata/2d148245-d791-4dd6-84b2-8994f92359ff"/>
-        </MetadataURL>
-        <Style>
-          <Name>prodes-amz:municipalities_amazon_biome</Name>
-          <Title>Municipalities border</Title>
-          <LegendURL width="20" height="20">
-            <Format>image/png</Format>
-            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/ows?service=WMS&amp;request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=municipalities_amazon_biome"/>
-          </LegendURL>
-        </Style>
-      </Layer>
-      <Layer queryable="1" opaque="0">
-        <Name>no_forest_biome</Name>
-        <Title>No Forest</Title>
-        <Abstract/>
-        <KeywordList>
-          <Keyword>features</Keyword>
-          <Keyword>no_forest_biome</Keyword>
-        </KeywordList>
-        <CRS>EPSG:4674</CRS>
-        <CRS>CRS:84</CRS>
-        <EX_GeographicBoundingBox>
-          <westBoundLongitude>-73.0487478282961</westBoundLongitude>
-          <eastBoundLongitude>-44.0</eastBoundLongitude>
-          <southBoundLatitude>-16.290519038121</southBoundLatitude>
-          <northBoundLatitude>5.23022991936453</northBoundLatitude>
-        </EX_GeographicBoundingBox>
-        <BoundingBox CRS="CRS:84" minx="-73.0487478282961" miny="-16.290519038121" maxx="-44.0" maxy="5.23022991936453"/>
-        <BoundingBox CRS="EPSG:4674" minx="-16.290519038121" miny="-73.0487478282961" maxx="5.23022991936453" maxy="-44.0"/>
-        <MetadataURL type="FGDC">
-          <Format>text/plain</Format>
-          <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br/geonetwork/srv/eng/catalog.search#/metadata/bed1276c-aa3d-4f5b-b560-1879617ef13d"/>
-        </MetadataURL>
-        <Style>
-          <Name>terrabrasilis:no_forest</Name>
-          <Title>A no forest polygon style</Title>
-          <LegendURL width="20" height="20">
-            <Format>image/png</Format>
-            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/ows?service=WMS&amp;request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=no_forest_biome"/>
-          </LegendURL>
-        </Style>
-      </Layer>
-      <Layer queryable="1" opaque="0">
-        <Name>states_amazon_biome</Name>
-        <Title>States Amazon Biome</Title>
-        <Abstract/>
-        <KeywordList>
-          <Keyword>features</Keyword>
-          <Keyword>states_amazon_biome</Keyword>
-        </KeywordList>
-        <CRS>EPSG:4674</CRS>
-        <CRS>CRS:84</CRS>
-        <EX_GeographicBoundingBox>
-          <westBoundLongitude>-73.9904499689999</westBoundLongitude>
-          <eastBoundLongitude>-43.017767940646</eastBoundLongitude>
-          <southBoundLatitude>-16.290519038121</southBoundLatitude>
-          <northBoundLatitude>5.271841077</northBoundLatitude>
-        </EX_GeographicBoundingBox>
-        <BoundingBox CRS="CRS:84" minx="-73.9904499689999" miny="-16.290519038121" maxx="-43.017767940646" maxy="5.271841077"/>
-        <BoundingBox CRS="EPSG:4674" minx="-16.290519038121" miny="-73.9904499689999" maxx="5.271841077" maxy="-43.017767940646"/>
-        <MetadataURL type="FGDC">
-          <Format>text/plain</Format>
-          <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br/geonetwork/srv/eng/catalog.search#/metadata/f8d8c17d-f8f0-4d9d-a7a5-46e90511c377"/>
-        </MetadataURL>
-        <Style>
-          <Name>prodes-amz:states_amazon_biome</Name>
-          <Title>States border</Title>
-          <LegendURL width="20" height="20">
-            <Format>image/png</Format>
-            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/ows?service=WMS&amp;request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=states_amazon_biome"/>
-          </LegendURL>
-        </Style>
-      </Layer>
-      <Layer queryable="1" opaque="0">
-        <Name>yearly_deforestation_2008_2018_biome</Name>
-        <Title>Yearly Deforestation in Amazon Biome - 2008/2018</Title>
-        <Abstract>Yearly deforestation commonly called by increments of deforestation for 2008/2018 to the Amazon biome</Abstract>
-        <KeywordList>
-          <Keyword>features</Keyword>
-          <Keyword>yearly_deforestation_2008_2018_biome</Keyword>
-        </KeywordList>
-        <CRS>EPSG:4674</CRS>
-        <CRS>CRS:84</CRS>
-        <EX_GeographicBoundingBox>
-          <westBoundLongitude>-73.7957608282227</westBoundLongitude>
-          <eastBoundLongitude>-44.0017358894825</eastBoundLongitude>
-          <southBoundLatitude>-16.2182503090175</southBoundLatitude>
-          <northBoundLatitude>5.15168191942772</northBoundLatitude>
-        </EX_GeographicBoundingBox>
-        <BoundingBox CRS="CRS:84" minx="-73.7957608282227" miny="-16.2182503090175" maxx="-44.0017358894825" maxy="5.15168191942772"/>
-        <BoundingBox CRS="EPSG:4674" minx="-16.2182503090175" miny="-73.7957608282227" maxx="5.15168191942772" maxy="-44.0017358894825"/>
-        <Dimension name="time" default="2008-01-01T00:00:00.000Z/2018-01-01T00:00:00.000Z" units="ISO8601">2008-01-01T00:00:00.000Z,2009-01-01T00:00:00.000Z,2010-01-01T00:00:00.000Z,2011-01-01T00:00:00.000Z,2012-01-01T00:00:00.000Z,2013-01-01T00:00:00.000Z,2014-01-01T00:00:00.000Z,2015-01-01T00:00:00.000Z,2016-01-01T00:00:00.000Z,2017-01-01T00:00:00.000Z,2018-01-01T00:00:00.000Z</Dimension>
-        <MetadataURL type="FGDC">
-          <Format>text/plain</Format>
-          <OnlineResource xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br/geonetwork/srv/eng/catalog.search#/metadata/b75b83db-8026-43f9-9537-ee1dfa308158"/>
-        </MetadataURL>
-        <Style>
-          <Name>terrabrasilis:amazon_deforestation</Name>
-          <Title>terrabrasilis:amazon_deforestation</Title>
-          <LegendURL width="162" height="220">
-            <Format>image/png</Format>
-            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/ows?service=WMS&amp;request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=yearly_deforestation_2008_2018_biome"/>
-          </LegendURL>
-        </Style>
-        <Style>
-          <Name>simple_deforestation</Name>
-          <Title>simple_deforestation</Title>
-          <LegendURL width="57" height="220">
-            <Format>image/png</Format>
-            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/ows?service=WMS&amp;request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=yearly_deforestation_2008_2018_biome&amp;style=simple_deforestation"/>
+            <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://terrabrasilis.dpi.inpe.br:80/geoserver/prodes-amz/accumulated_deforestation_1988_2007_biome/ows?service=WMS&amp;request=GetLegendGraphic&amp;format=image%2Fpng&amp;width=20&amp;height=20&amp;layer=accumulated_deforestation_1988_2007_biome"/>
           </LegendURL>
         </Style>
       </Layer>
