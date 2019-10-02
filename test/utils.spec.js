@@ -29,7 +29,7 @@ describe('UTILS', () => {
     })
 
     it('.getBounds', async () => {
-      const resolved = new Promise((resolve) => resolve(xmlCapabilitiesFixture))
+      const resolved = new Promise((resolve) => resolve({data: xmlCapabilitiesFixture}))
       sandbox.stub(axios, 'get').returns(resolved)
       const result = await utils.getBounds(layerMetadata)
       assert.deepEqual(result, [
