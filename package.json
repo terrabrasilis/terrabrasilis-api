@@ -18,7 +18,7 @@
     "leaflet",
     "wms"
   ],
-  "author": "Terrabrasilis team (André Carvalho, Jether Rodrigues, Luiz Fernando Assis)",
+  "author": "Terrabrasilis team (André Carvalho, Jether Rodrigues, Luiz Fernando Assis, Paulo Luan Mariano)",
   "license": "GPL-3.0",
   "dependencies": {
     "axios": "^0.19.0",
