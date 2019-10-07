@@ -962,6 +962,14 @@ Terrabrasilis = (function () {
     return this
   }
 
+  const enableZoomBox = function () {
+    L.Control.boxzoom({
+        position:'topleft',
+    }).addTo(map)
+
+    return this
+  }
+
   /**
      * this method enable the scale leaflet control
      */
@@ -1871,6 +1879,7 @@ Terrabrasilis = (function () {
     enableScaleControlTool: enableScaleControl,
     enableGeocodingTool: enableGeocodingControl,
     enableLegendAndToolToLayers: enableLegendAndToolToLayers,
+    enableZoomBox: enableZoomBox,
     hideStandardLayerControl: hideStandardLayerControl,
     enableInvalidateSize: resizeMap,
     disableMap: removeMap,
