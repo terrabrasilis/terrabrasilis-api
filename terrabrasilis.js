@@ -571,7 +571,7 @@ Terrabrasilis = (function () {
             }
           }
 
-          const host = ol.datasource.host.replace('ows', 'gwc/service/wms')
+          const host = ol.datasource.host //.replace('ows', 'gwc/service/wms')
           var overlayer = L.tileLayer.wms(host, options)
           // overlayers[ol.title] = overlayer;
           overlayers[ol.id] = overlayer
