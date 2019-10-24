@@ -1,6 +1,6 @@
 const { get, find } = require('lodash')
 const axios = require('axios')
-const {xmlToJson} = require('./xmlToJson')
+const { xmlToJson } = require('./xmlToJson')
 
 const Utils = {
   /*
@@ -54,6 +54,17 @@ const Utils = {
     })
   },
 
+  getDimensions: (layerConfig) => {
+    return new Promise((resolve, reject) => {
+      const url = Utils.configureUrlWorkspace(layerConfig)
+      axios.get(url).then((xmlResult) => {
+        const jsonResult = Utils.parseXML(xmlResult.data)
+        const dimensions = get(jsonResult, 'WMS_Capabilities.Capability.Layer.Layer.Dimension', [])
+        resolve(Utils.splitDimensions(dimensions))
+      })
+    })
+  },
+
   splitBounds(layer) {
     const bounds = get(layer, 'EX_GeographicBoundingBox', [])
     if (bounds) {
@@ -64,9 +75,14 @@ const Utils = {
     }
   },
 
+  splitDimensions(layer = '') {
+    const bounds = layer.split(',')
+    return bounds
+  },
+
   configureUrlWorkspace: (layerConfig) => {
     let baseUrl = layerConfig.datasource.host.replace('ows', layerConfig.workspace + '/' + layerConfig.name + '/ows')
-    baseUrl += `?${layerConfig.capabilitiesUrl}` 
+    baseUrl += `?${layerConfig.capabilitiesUrl}`
     return baseUrl
   },
 
