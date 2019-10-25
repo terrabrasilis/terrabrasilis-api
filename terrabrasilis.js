@@ -1854,6 +1854,10 @@ Terrabrasilis = (function () {
     })
   }
 
+  const getDimensions = function (layerMetada) {
+    return utils.getDimensions(layerMetada)
+  }
+
   /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // return
   /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1913,6 +1917,7 @@ Terrabrasilis = (function () {
     enableLoading: enableLoading,
     disableLoading: disableLoading,
     fitBounds: fitBounds,
+    getDimensions: getDimensions,
 
     /* TimeDimension tool */
     onOffTimeDimension: onOffTimeDimension

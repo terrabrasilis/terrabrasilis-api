@@ -1,4 +1,4 @@
-const { get, find } = require('lodash')
+const { get, find, head, isString } = require('lodash')
 const axios = require('axios')
 const { xmlToJson } = require('./xmlToJson')
 
@@ -76,8 +76,21 @@ const Utils = {
   },
 
   splitDimensions(layer = '') {
-    const bounds = layer.split(',')
-    return bounds
+    let dimensionTimes = layer.split(',')
+    dimensionTimes = Utils.sortDatesArray(dimensionTimes)
+    return dimensionTimes
+  },
+
+  sortDatesArray(timesArray) {
+    let arrayToBeSorted = timesArray
+    const IS_STRING = isString(head(timesArray))
+    if(IS_STRING) {
+        arrayToBeSorted = arrayToBeSorted.map((stringDate) => new Date(stringDate.substr(0,10).replace(/-/g, '/')))
+    }
+
+    return arrayToBeSorted.sort(function compare(date1, date2) {
+      return new Date(date1) - new Date(date2)
+    })
   },
 
   configureUrlWorkspace: (layerConfig) => {
