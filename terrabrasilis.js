@@ -1847,10 +1847,15 @@ Terrabrasilis = (function () {
     $(dom).loading('stop')
   }
 
-
   const fitBounds = function (layerMetada) {
-    return utils.getBounds(layerMetada).then((bounds) => {
-      map.fitBounds(bounds)
+    return new Promise((resolve, reject) => {
+      utils.getBounds(layerMetada)
+        .then((bounds) => {
+          map.fitBounds(bounds)
+          resolve()
+        })
+        .catch(reject)
+        .finally(resolve)
     })
   }
 
