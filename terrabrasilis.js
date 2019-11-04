@@ -1855,7 +1855,6 @@ Terrabrasilis = (function () {
           resolve()
         })
         .catch(reject)
-        .finally(resolve)
     })
   }
 
