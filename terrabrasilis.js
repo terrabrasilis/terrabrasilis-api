@@ -4,6 +4,7 @@ require('terrabrasilis-timedimension')
 require('terrabrasilis-map-plugins')
 const leafletEsriGeocoding = require('esri-leaflet-geocoder')
 const utils = require('./src/utils')
+const { get, set } = require('lodash')
 
 /**
  * This class use the Revealing Module Pattern.
@@ -1862,6 +1863,23 @@ Terrabrasilis = (function () {
     return utils.getDimensions(layerMetada)
   }
 
+  /**
+   * Parames inside filter are the same as the layer-filter-reducer interface
+   * 
+   * @param {name} string the name of the layer
+   * @param {time} string: time format should be DATE_1/DATE_2
+   *          Acceptale values could be: YYYY/YYYY or YYYY-MM/YYYY-MM or YYYY-MM-DD YYYY-MM-DD
+   *          valid examples: 2017/2017 2017-01/2017-02 2017-06-31/2017-06-31  
+   */
+  const filterLayers = function (filters) {
+    filters.map(({name, time}) => {
+      const layer = getLayerByName(name)
+      if(!layer) return
+      layer.setParams({ time })
+      layer.redraw()  
+    })
+  }
+
   /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // return
   /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1875,6 +1893,7 @@ Terrabrasilis = (function () {
          * mount map and enable tools, these methods use the fluent interface concepts
          */
     map: mountMap,
+    filterLayers: filterLayers,
     addBaseLayers: mountBaseLayers,
     addOverLayers: mountOverLayers,
     addCustomizedBaseLayers: mountCustomizedBaseLayers,
