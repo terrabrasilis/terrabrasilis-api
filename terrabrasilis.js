@@ -1841,8 +1841,6 @@ Terrabrasilis = (function () {
      * Disable loading to body
      */
   const disableLoading = function (dom) {
-    console.log('Disable loading')
-
     if (typeof (dom) === 'undefined' || dom === null) dom = 'body'
 
     $(dom).loading('stop')
