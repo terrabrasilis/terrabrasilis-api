@@ -1,6 +1,6 @@
-const { get, find } = require('lodash')
+const { get, find, head, isString } = require('lodash')
 const axios = require('axios')
-const {xmlToJson} = require('./xmlToJson')
+const { xmlToJson } = require('./xmlToJson')
 
 const Utils = {
   /*
@@ -43,18 +43,36 @@ const Utils = {
         }
     ]
     */
-  getBounds: (layerConfig) => {
+  getBounds: layerConfig => {
     return new Promise((resolve, reject) => {
       const url = Utils.configureUrlWorkspace(layerConfig)
-      axios.get(url).then((xmlResult) => {
+      axios
+        .get(url)
+        .then(xmlResult => {
+          const jsonResult = Utils.parseXML(xmlResult.data)
+          const layer = get(jsonResult, 'WMS_Capabilities.Capability.Layer', [])
+          resolve(Utils.splitBounds(layer))
+        })
+        .catch(reject)
+    })
+  },
+
+  getDimensions: layerConfig => {
+    return new Promise((resolve, reject) => {
+      const url = Utils.configureUrlWorkspace(layerConfig)
+      axios.get(url).then(xmlResult => {
         const jsonResult = Utils.parseXML(xmlResult.data)
-        const layer = get(jsonResult, 'WMS_Capabilities.Capability.Layer', [])
-        resolve(Utils.splitBounds(layer))
+        const dimensions = get(
+          jsonResult,
+          'WMS_Capabilities.Capability.Layer.Layer.Dimension',
+          []
+        )
+        resolve(Utils.splitDimensions(dimensions))
       })
     })
   },
 
-  splitBounds(layer) {
+  splitBounds (layer) {
     const bounds = get(layer, 'EX_GeographicBoundingBox', [])
     if (bounds) {
       return [
@@ -64,13 +82,33 @@ const Utils = {
     }
   },
 
+  splitDimensions (layer = '') {
+    let dimensionTimes = layer.split(',')
+    dimensionTimes = Utils.sortDatesArray(dimensionTimes)
+    return dimensionTimes
+  },
+
+  sortDatesArray (timesArray) {
+    let arrayToBeSorted = timesArray
+    const IS_STRING = isString(head(timesArray))
+    if (IS_STRING) {
+      arrayToBeSorted = arrayToBeSorted.map(
+        stringDate => new Date(stringDate.substr(0, 10).replace(/-/g, '/'))
+      )
+    }
+
+    return arrayToBeSorted.sort(function compare (date1, date2) {
+      return new Date(date1) - new Date(date2)
+    })
+  },
+
   configureUrlWorkspace: (layerConfig) => {
     let baseUrl = layerConfig.datasource.host.replace('ows', layerConfig.workspace + '/' + layerConfig.name + '/ows')
     baseUrl += `?REQUEST=GetCapabilities&VERSION=1.3.0&SERVICE=wms` 
     return baseUrl
   },
 
-  parseXML: (xmlString) => {
+  parseXML: xmlString => {
     const xmlNode = new DOMParser().parseFromString(xmlString, 'text/xml')
     const result = xmlToJson(xmlNode)
     return result
