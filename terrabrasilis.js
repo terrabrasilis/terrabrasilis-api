@@ -5,6 +5,7 @@ require('terrabrasilis-map-plugins')
 const leafletEsriGeocoding = require('esri-leaflet-geocoder')
 const utils = require('./src/utils')
 const { get, set } = require('lodash')
+const turf = require('./src/turf')
 
 /**
  * This class use the Revealing Module Pattern.
@@ -826,60 +827,225 @@ Terrabrasilis = (function () {
     drawnItems = new L.FeatureGroup()
     map.addLayer(drawnItems)
 
+    // const options = {
+    //   draw: {
+    //     polygon: {
+    //       allowIntersection: false,
+    //       drawError: {
+    //         color: '#e1e100',
+    //         message: '<strong>Oh snap!<strong> you can\'t draw that!'
+    //       },
+    //       shapeOptions: {
+    //         clickable: true,
+    //         showArea: true,
+    //         color: '#bada55'
+    //       },
+    //       showArea: true
+    //     },
+    //     polyline: {
+    //       shapeOptions: {
+    //         clickable: true,
+    //         showArea: true,
+    //         color: '#f357a1',
+    //         weight: 7
+    //       },
+    //       showArea: true
+    //     },
+    //     rectangle: {
+    //       shapeOptions: {
+    //         clickable: true,
+    //         showArea: true
+    //       },
+    //       showArea: true
+    //     },
+    //     marker: {
+    //       icon: TBIcon
+    //     },
+    //     circle: false
+    //   },
+    //   metric: true,
+    //   edit: {
+    //     featureGroup: drawnItems,
+    //     edit: true,
+    //     remove: true,
+    //     buffer: {
+    //       replace_polylines: false,
+    //       separate_buffer: true,
+    //       buffer_style: {
+    //         // renderer: renderer,
+    //         // color: color,
+    //         weight: 5,
+    //         fillOpacity: 0,
+    //         dashArray: '5, 20'
+    //       }
+    //     }
+    //   }
+    // }
+
+    /////////////////////////////////////////////////////////////////////////////
+    // Terrabrasilis time series
+    /////////////////////////////////////////////////////////////////////////////
+
     const options = {
       draw: {
         polygon: {
+          metric: true,
           allowIntersection: false,
+          showArea: true,
           drawError: {
-            color: '#e1e100',
+            color: '#b00b00',
+            timeout: 1000,
             message: '<strong>Oh snap!<strong> you can\'t draw that!'
           },
           shapeOptions: {
-            clickable: true,
-            showArea: true,
-            color: '#bada55'
-          },
-          showArea: true
+            color: '#000000',
+            fill: false,
+          }  
         },
-        polyline: {
-          shapeOptions: {
-            clickable: true,
-            showArea: true,
-            color: '#f357a1',
-            weight: 7
-          },
-          showArea: true
-        },
+        polyline: false, 
         rectangle: {
+          metric: true,
+          showArea: true,
           shapeOptions: {
             clickable: true,
-            showArea: true
-          },
-          showArea: true
+            color: '#000000',
+            fill: false,
+          }
         },
         marker: {
           icon: TBIcon
         },
-        circle: false
+        circle: false,
+        // {
+        //   metric: true,
+        //   showArea: true,
+        //   shapeOptions: {
+        //     color: '#000000',
+        //     fill: false,
+        //   }
+        // }
       },
-      metric: true,
       edit: {
         featureGroup: drawnItems,
-        edit: true,
-        remove: true,
-        buffer: {
-          replace_polylines: false,
-          separate_buffer: true,
-          buffer_style: {
-            // renderer: renderer,
-            // color: color,
-            weight: 5,
-            fillOpacity: 0,
-            dashArray: '5, 20'
-          }
-        }
+        edit: false,
+        remove: false,
       }
     }
+
+    var turfLayer = L.geoJson(null, {
+      style: function (feature) {
+        var style = {
+          color: '#1e1e1e', //'#00FFFF',
+          //fillColor: null,
+          weight: 3,
+          fillOpacity: .0
+        };
+        return style;
+      }
+    }).addTo(map);
+
+    // geojson to leaflet and return a CircleMarker in center of each square 
+    var centroidsLayer = L.geoJson(null, {
+      style: function(feature) {
+          return {color: "#910000"};
+      },
+      pointToLayer: function(feature, latlng) {
+          return new L.CircleMarker(latlng, {radius: 3, fillOpacity: 1});
+      },
+      // onEachFeature: function (feature, layer) {
+      //     layer.bindPopup(feature.geometry.coordinates);
+      // }
+    }).addTo(map);
+
+    var jsonCoords = null;
+    
+    //----- get points from polygon using a grid
+    function getPointsPolygon(layer, measure) {
+
+      // internal buffer to get MODIS pixel only within polygon
+      var buffered = turf.buffer(layer.toGeoJSON(), measure, { units: 'meters' });
+      //turfLayer.addData(buffered);
+      //console.log('buffered: ', buffered); //JSON.stringify(buffered));
+
+      // create bounding box of buffer layer
+      var bbox = turf.bboxPolygon(turf.bbox(buffered));
+      //console.log('bbox: ', bbox);
+
+      // pass to array type
+      var bbox_array = bbox.geometry.coordinates[0];
+      //console.log('bbox_array: ', JSON.stringify(bbox_array));
+      var array = [];
+      array = bbox_array[0].concat(bbox_array[2]);
+
+      // set options to squareGrid turf.js
+      var options = {
+        units: 'meters',
+        mask: buffered, // use buffer as mask
+      };
+      var cellSide = 250;
+
+      var squareGrid = turf.squareGrid(array, cellSide, options);
+      turfLayer.addData(squareGrid);
+      //console.log('squareGrid: ', squareGrid);
+
+      console.log('Amount of features: ', squareGrid.features.length);
+
+      // consider all squares and put a unique centroid for each one
+      var allFeatures = [];
+      for (var i = 0; i <= squareGrid.features.length; i++){
+        var feature = squareGrid.features[i];
+        if (typeof feature !== 'undefined') {
+          var polygon = turf.polygon(feature.geometry.coordinates);
+          allFeatures[i] = turf.centroid(polygon);
+          // console.log('all features: ', allFeatures);
+        }}
+      // show points over map
+      centroidsLayer.addData(allFeatures);
+
+      //jsonCoords = JSON.parse(JSON.stringify(allFeatures));
+      jsonCoords = JSON.stringify(allFeatures);
+      // console.log('GeoJSON coordinates from polygon: ', jsonCoords);
+      // test at https://utahemre.github.io/geojsontest.html
+      
+      // localStorage.setItem('jsonCoords', jsonCoords)
+//     return jsonCoords;
+    }
+
+  //----- create a new shapefile
+  map.on("draw:created", function (e) {
+
+    var layerShp = e.layer;
+    //console.log('shp1: ', layerShp);
+    drawnItems.clearLayers();
+    turfLayer.clearLayers();
+    centroidsLayer.clearLayers();
+
+    layerShp.addTo(drawnItems);
+
+    var type = e.layerType;
+    var area = 0;
+
+    if (type === 'polygon' || type === 'rectangle') {
+      
+      area = L.GeometryUtil.geodesicArea(layerShp.getLatLngs()[0]); // meters by default
+      var areaInHa = (area / 10000).toFixed(2)
+
+      if (areaInHa >= 2000 | areaInHa <= 50) {
+        //console.log("Area " + areaInHa + " ha is more than 2000 ha or less than 50 ha.");
+        //alert('Area has ' + areaInHa + ' ha!\nPlease, draw a polygon with an area between 50 and 2000 ha.');
+        localStorage.setItem('jsonCoords', "");
+        drawnItems.clearLayers();
+        turfLayer.clearLayers();
+        centroidsLayer.clearLayers();
+      } else {
+        //-- internal buffer to get MODIS pixel only within polygon
+        getPointsPolygon(layerShp, -200);
+        console.log('Area Hectares:', areaInHa, "ha to: ", type);
+        localStorage.setItem('jsonCoords', jsonCoords);
+      }
+    } 
+  });
+  /////////////////////////////////////////////////////////////////////////////
 
     drawControl = new L.Control.Draw(options)
     map.addControl(drawControl)
