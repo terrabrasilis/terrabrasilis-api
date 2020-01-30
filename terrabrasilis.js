@@ -1460,7 +1460,7 @@ Terrabrasilis = (function () {
   /**
      * This method try to find the layer identified by name excluding the Layers with time dimension enabled.
      *
-     * @param {*} layerName
+     * @param {*} layerName is the name of layer including the workspace ("workspace:layername")
      */
   const getLayerByName = function (layerName) {
     if (typeof (layerName) === 'undefined' || layerName === null) {
@@ -1471,7 +1471,7 @@ Terrabrasilis = (function () {
 
     let layer = null
     map.eachLayer(l => {
-      if (l.options._name && l.options._name === layerName && !layer) {
+      if (l.options.layers && l.options.layers === layerName && !layer) {
         layer = l
       }
     })
@@ -1489,7 +1489,7 @@ Terrabrasilis = (function () {
       // console.log("layer must not be null!");
       return false
     }
-    const ll = getLayerByName(layer.name)
+    const ll = getLayerByName(layer.workspace+':'+layer.name)
     return ((ll) ? (map.hasLayer(ll)) : (false))
   }
 
@@ -1504,10 +1504,11 @@ Terrabrasilis = (function () {
       return false
     }
     // if time dimension is enabled for this layer, remove it.
-    if (layer.name === _ctrlTimer.layerName) {
+    let layerName=layer.workspace+':'+layer.name;
+    if (layerName === _ctrlTimer.layerName) {
       removeTimerControl()
     }
-    const ll = getLayerByName(layer.name)
+    const ll = getLayerByName(layerName)
     if (ll) {
       map.removeLayer(ll)
     }
@@ -1542,7 +1543,7 @@ Terrabrasilis = (function () {
       // console.log("layer must not be null!");
       return false
     }
-    const ll = getLayerByName(layer.name)
+    const ll = getLayerByName(layer.workspace+':'+layer.name)
     if (ll) ll.setOpacity(value)
   }
 
@@ -1570,7 +1571,7 @@ Terrabrasilis = (function () {
     }
     // console.log(layersOnMap);
 
-    const ll = getLayerByName(layer.name)
+    const ll = getLayerByName(layer.workspace+':'+layer.name)
     const layerId = ll._leaflet_id
     for (let index = 0; index < layersOnMap.length; index++) {
       const element = layersOnMap[index]
@@ -1609,7 +1610,7 @@ Terrabrasilis = (function () {
     }
     // console.log(layersOnMap);
 
-    const ll = getLayerByName(layer.name)
+    const ll = getLayerByName(layer.workspace+':'+layer.name)
     const layerId = ll._leaflet_id
     for (let index = 0; index < layersOnMap.length; index++) {
       const element = layersOnMap[index]
@@ -1884,7 +1885,7 @@ Terrabrasilis = (function () {
      * Add the Time Dimension control into the map for one specific layer.
      * Optionally, you may use the option to aggregate times when walking through the timeline of a Layer.
      *
-     * @param {string} layerName The layer name to enable the Time Dimension tool over the map.
+     * @param {string} layerName The layer name to enable the Time Dimension tool over the map. Compose by "workspace:layername"
      * @param {boolen} aggregateTimes The control parameter to set the time aggregate option.
      */
   const addTimerControl = function (layerName, aggregateTimes) {
@@ -1906,7 +1907,9 @@ Terrabrasilis = (function () {
 
     _ctrlTimer.control = L.control.timeDimension(options).addTo(map)
     _ctrlTimer.layerName = layerName
-    if (addLayerTimeDimension(layerName)) {
+    let workspace=layerName.split(":")[0];
+    let name=layerName.split(":")[1];
+    if (addLayerTimeDimension(workspace,name)) {
       console.log('Enable TimeDimension support to the ' + layerName + ' Layer.')
       return true
     } else {
@@ -1931,7 +1934,7 @@ Terrabrasilis = (function () {
       proxy: constants.PROXY
     }
 
-    const ll = getLayerByName(layerConfig.name)
+    const ll = getLayerByName(layerConfig.workspace+':'+layerConfig.name)
     return L.timeDimension.layer.wms(ll, tdOptions)
   }
   /**
@@ -1940,15 +1943,15 @@ Terrabrasilis = (function () {
      *
      * @param {string} layerName, the layer name
      */
-  const addLayerTimeDimension = function (layerName) {
+  const addLayerTimeDimension = function (workspace,layerName) {
     var hasTimeLayer = getTimeLayer(layerName)
 
-    if (hasTimeLayer && isLayerActived({ name: layerName })) {
+    if (hasTimeLayer && isLayerActived({ name: layerName, workspace: workspace })) {
       if (!_ctrlTimer.timeDimensionLayer) {
         _ctrlTimer.timeDimensionLayer = createTimeDimensionLayerFromConfig(hasTimeLayer)
       }
 
-      _ctrlTimer.leafletLayer = getLayerByName(layerName)
+      _ctrlTimer.leafletLayer = getLayerByName(workspace+':'+layerName)
 
       // Removing the default Leaflet Layer from the map.
       map.removeLayer(_ctrlTimer.leafletLayer)
