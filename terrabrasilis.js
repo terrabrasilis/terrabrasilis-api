@@ -2039,11 +2039,12 @@ Terrabrasilis = (function () {
    *          valid examples: 2017/2017 2017-01/2017-02 2017-06-31/2017-06-31  
    */
   const filterLayers = function (filters) {
-    filters.map(({name, time}) => {
-      const layer = getLayerByName(name)
+    filters.map(({name, workspace, time}) => {
+      let completeLayerName = workspace + ":" + name;
+      const layer = getLayerByName(completeLayerName);
       if(!layer) return
-      layer.setParams({ time })
-      layer.redraw()  
+      layer.setParams({ time });
+      layer.redraw();  
     })
   }
 
