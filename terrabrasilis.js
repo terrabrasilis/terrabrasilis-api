@@ -430,13 +430,16 @@ Terrabrasilis = (function () {
       if (overLayersOptions.hasOwnProperty(key)) {
         const ol = overLayersOptions[key]
 
+        let layerName = getLayerName(ol);
+
         if (!ol.baselayer) {
           const options = {
-            layers: ol.workspace + ':' + ol.name,
+            id: ol.id,
+            layers: ol.workspace + ':' + layerName,
             format: 'image/png',
             transparent: true,
             tiled: true,
-            _name: ol.name,
+            _name: layerName,
             _baselayer: ol.baselayer,
             zIndex: zIndexCount++
           }
@@ -552,12 +555,16 @@ Terrabrasilis = (function () {
         const ol = overLayersOptions[key]
         // console.log(ol);
         if (!ol.baselayer) {
+
+          let layerName = getLayerName(ol);
+     
           const options = {
-            layers: ol.workspace + ':' + ol.name,
+            id: ol.id,
+            layers: ol.workspace + ':' + layerName,
             format: 'image/png',
             transparent: true,
             tiled: true,
-            _name: ol.name,
+            _name: layerName,
             _baselayer: ol.baselayer,
             zIndex: ol.stackOrder
           }
@@ -599,6 +606,27 @@ Terrabrasilis = (function () {
     }
 
     return this
+  }
+
+  const getLayerName = function(l)
+  {
+    
+    if(l.nameAuthenticated && l.nameAuthenticated.length>0)
+    {
+      if(Authentication.hasToken())
+      {
+        return l.nameAuthenticated;
+      }
+      else
+      {
+        return l.name;
+      } 
+      }
+    else
+    {
+      return l.name;
+    }
+    
   }
 
   /**
@@ -1480,6 +1508,26 @@ Terrabrasilis = (function () {
     return layer
   }
 
+   /**
+     * This method try to find the layer identified by id.
+     *
+     * @param {*} layerId layerId
+     */
+    const getLayerById = function (layerId) {
+      if (typeof (layerId) === 'undefined' || layerId === null) {
+         return null
+      }
+  
+      let layer = null
+      map.eachLayer(l => {
+        if (l.options.id && l.options.id === layerId && !layer) {
+          layer = l
+        }
+      })
+  
+      return layer
+    }
+
   /**
      * This method ask to the map if the layer is visible
      *
@@ -2052,6 +2100,57 @@ Terrabrasilis = (function () {
       layer.redraw();  
     })
   }
+/**
+ * This method can be invoked to updateLayer values syncronizing appLayers to leafletLayers.
+ * @param {*} appLayers List of app layers in JSON format
+ */
+  const updateLayers = function(appLayers)
+  {
+    for (const key in appLayers) {
+      if (appLayers.hasOwnProperty(key)) {
+        const appLayer = appLayers[key]
+        var leafLetLayer = getLayerById(appLayer.id);
+        if(leafLetLayer!=null)
+        {
+          var userAuthenticated = Authentication.hasToken();
+          switchToAuthenticatedLayer(leafLetLayer, appLayer, userAuthenticated);
+        }
+
+      }
+    }
+  }
+  /**
+   * This method updates the layer name when user login or logout. This is invoked by a Authentication Oauth Api event.
+   * If the user is authenticated and if the user has a value on "nameAuthenticated" field, the source layer on leaflet will be changed.
+   *   @param {*} leafletLayer Referenced leaflet layer
+   *   @param {*} appLayer Referenced app layer
+   *   @param {*} authenticated If user is authenticated or not
+   */
+  const switchToAuthenticatedLayer = function(leafLetLayer, appLayer, authenticated)
+  {
+    if(appLayer.nameAuthenticated && appLayer.nameAuthenticated.length>0)
+    {
+      map.removeLayer(leafLetLayer);
+      
+      //Updating Layer Options
+      if(authenticated==true)
+      {
+        leafLetLayer.options.layers = appLayer.workspace + ":" + appLayer.nameAuthenticated;
+        leafLetLayer.options._name = appLayer.nameAuthenticated;
+        
+      }
+      else
+      {
+        leafLetLayer.options.layers = appLayer.workspace + ":" + appLayer.name;
+        leafLetLayer.options._name = appLayer.name;
+      }
+      //Updating LeafLet wmsParams
+      leafLetLayer.wmsParams.layers = leafLetLayer.options.layers; 
+      leafLetLayer.wmsParams._name = leafLetLayer.options._name;
+
+      map.addLayer(leafLetLayer);
+    }
+   }
 
   /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // return
@@ -2114,6 +2213,7 @@ Terrabrasilis = (function () {
     disableLoading: disableLoading,
     fitBounds: fitBounds,
     getDimensions: getDimensions,
+    updateLayers: updateLayers,
 
     /* TimeDimension tool */
     onOffTimeDimension: onOffTimeDimension
