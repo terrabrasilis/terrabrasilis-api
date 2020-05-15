@@ -338,6 +338,9 @@ Terrabrasilis = (function () {
           var baselayer = L.tileLayer(host, options)
           baselayer.setZIndex(0)
           baselayers[bl.title] = baselayer
+
+          switchToAuthenticatedLayer(baselayer, bl, Authentication.hasToken());
+
         }
       }
     };
@@ -431,7 +434,7 @@ Terrabrasilis = (function () {
         const ol = overLayersOptions[key]
 
         let layerName = getLayerName(ol);
-
+     
         if (!ol.baselayer) {
           const options = {
             id: ol.id,
@@ -443,6 +446,9 @@ Terrabrasilis = (function () {
             _baselayer: ol.baselayer,
             zIndex: zIndexCount++
           }
+
+          
+
           if (ol.subdomains != null) {
             if (ol.subdomains.length > 0) {
               // let domains = [];
@@ -458,6 +464,8 @@ Terrabrasilis = (function () {
           var overlayer = L.tileLayer.wms(ol.host, options)
           // overlayers[ol.title] = overlayer;
           overlayers[ol.id] = overlayer
+
+          switchToAuthenticatedLayer(overlayer, ol, Authentication.hasToken());
 
           legend.addLegend({
             name: ol.title,
@@ -591,6 +599,7 @@ Terrabrasilis = (function () {
             // _timeConfigLayers[ol.title] = ol;
             _timeConfigLayers[ol.id] = ol
           }
+          switchToAuthenticatedLayer(overlayer, ol, Authentication.hasToken());
         }
       }
     };
@@ -605,6 +614,8 @@ Terrabrasilis = (function () {
       }
     }
 
+    
+    
     return this
   }
 
@@ -2130,27 +2141,38 @@ Terrabrasilis = (function () {
   {
     if(appLayer.nameAuthenticated && appLayer.nameAuthenticated.length>0)
     {
-      map.removeLayer(leafLetLayer);
-      
+
+      if(appLayer.active)
+      {
+        map.removeLayer(leafLetLayer);
+      }
+            
       //Updating Layer Options
       if(authenticated==true)
       {
         leafLetLayer.options.layers = appLayer.workspace + ":" + appLayer.nameAuthenticated;
         leafLetLayer.options._name = appLayer.nameAuthenticated;
-        
+        leafLetLayer.wmsParams.access_token=Authentication.getToken();
       }
       else
       {
         leafLetLayer.options.layers = appLayer.workspace + ":" + appLayer.name;
         leafLetLayer.options._name = appLayer.name;
+        leafLetLayer.wmsParams.access_token=null;
       }
       //Updating LeafLet wmsParams
       leafLetLayer.wmsParams.layers = leafLetLayer.options.layers; 
       leafLetLayer.wmsParams._name = leafLetLayer.options._name;
 
-      map.addLayer(leafLetLayer);
+      if(appLayer.active)
+      {
+        map.addLayer(leafLetLayer);
+      }
+      
     }
    }
+
+
 
   /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // return
