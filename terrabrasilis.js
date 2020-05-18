@@ -1549,7 +1549,7 @@ Terrabrasilis = (function () {
       // console.log("layer must not be null!");
       return false
     }
-    const ll = getLayerByName(layer.workspace+':'+layer.name)
+    const ll = getLayerByName(layer.workspace+':'+getLayerName(layer))
     return ((ll) ? (map.hasLayer(ll)) : (false))
   }
 
@@ -1564,7 +1564,7 @@ Terrabrasilis = (function () {
       return false
     }
     // if time dimension is enabled for this layer, remove it.
-    let layerName=layer.workspace+':'+layer.name;
+    let layerName=layer.workspace+':'+getLayerName(layer);
     if (layerName === _ctrlTimer.layerName) {
       removeTimerControl()
     }
@@ -1603,7 +1603,7 @@ Terrabrasilis = (function () {
       // console.log("layer must not be null!");
       return false
     }
-    const ll = getLayerByName(layer.workspace+':'+layer.name)
+    const ll = getLayerByName(layer.workspace+':'+getLayerName(layer))
     if (ll) ll.setOpacity(value)
   }
 
@@ -1631,7 +1631,7 @@ Terrabrasilis = (function () {
     }
     // console.log(layersOnMap);
 
-    const ll = getLayerByName(layer.workspace+':'+layer.name)
+    const ll = getLayerByName(layer.workspace+':'+getLayerName(layer))
     const layerId = ll._leaflet_id
     for (let index = 0; index < layersOnMap.length; index++) {
       const element = layersOnMap[index]
@@ -1670,7 +1670,7 @@ Terrabrasilis = (function () {
     }
     // console.log(layersOnMap);
 
-    const ll = getLayerByName(layer.workspace+':'+layer.name)
+    const ll = getLayerByName(layer.workspace+':'+getLayerName(layer))
     const layerId = ll._leaflet_id
     for (let index = 0; index < layersOnMap.length; index++) {
       const element = layersOnMap[index]
