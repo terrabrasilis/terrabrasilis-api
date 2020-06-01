@@ -1511,8 +1511,23 @@ Terrabrasilis = (function () {
 
     let layer = null
     map.eachLayer(l => {
-      if (l.options.layers && l.options.layers === layerName && !layer) {
-        layer = l
+      if(layer==null)
+      {
+        if(l.options.layers)
+        {
+          if (l.options.layers === layerName ) {
+            layer = l
+          }
+        } 
+        else
+        {
+          if(l.options._name)
+          {
+            if (l.options._name === layerName ) {
+              layer = l
+            }
+          }
+        }
       }
     })
 
@@ -1549,7 +1564,15 @@ Terrabrasilis = (function () {
       // console.log("layer must not be null!");
       return false
     }
-    const ll = getLayerByName(layer.workspace+':'+getLayerName(layer))
+
+    if(layer.workspace)
+    {
+      layerName=layer.workspace+':';
+    }
+
+    layerName += getLayerName(layer);
+
+    const ll = getLayerByName(layerName)
     return ((ll) ? (map.hasLayer(ll)) : (false))
   }
 
@@ -1564,7 +1587,15 @@ Terrabrasilis = (function () {
       return false
     }
     // if time dimension is enabled for this layer, remove it.
-    let layerName=layer.workspace+':'+getLayerName(layer);
+
+    let layerName="";
+
+    if(layer.workspace)
+    {
+      layerName=layer.workspace+':';
+    }
+
+    layerName += getLayerName(layer);
     if (layerName === _ctrlTimer.layerName) {
       removeTimerControl()
     }
@@ -1603,7 +1634,15 @@ Terrabrasilis = (function () {
       // console.log("layer must not be null!");
       return false
     }
-    const ll = getLayerByName(layer.workspace+':'+getLayerName(layer))
+
+    if(layer.workspace)
+    {
+      layerName=layer.workspace+':';
+    }
+
+    layerName += getLayerName(layer);
+
+    const ll = getLayerByName(layerName)
     if (ll) ll.setOpacity(value)
   }
 
@@ -1631,7 +1670,15 @@ Terrabrasilis = (function () {
     }
     // console.log(layersOnMap);
 
-    const ll = getLayerByName(layer.workspace+':'+getLayerName(layer))
+
+    if(layer.workspace)
+    {
+      layerName=layer.workspace+':';
+    }
+
+    layerName += getLayerName(layer);
+
+    const ll = getLayerByName(layerName)
     const layerId = ll._leaflet_id
     for (let index = 0; index < layersOnMap.length; index++) {
       const element = layersOnMap[index]
@@ -1670,7 +1717,15 @@ Terrabrasilis = (function () {
     }
     // console.log(layersOnMap);
 
-    const ll = getLayerByName(layer.workspace+':'+getLayerName(layer))
+
+    if(layer.workspace)
+    {
+      layerName=layer.workspace+':';
+    }
+
+    layerName += getLayerName(layer);
+
+    const ll = getLayerByName(layerName)
     const layerId = ll._leaflet_id
     for (let index = 0; index < layersOnMap.length; index++) {
       const element = layersOnMap[index]
