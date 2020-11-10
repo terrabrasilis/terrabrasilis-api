@@ -1386,12 +1386,23 @@ Terrabrasilis = (function () {
       if (popupTemplate.childElementCount > 1) {
         return false
       }
+      var authorization = "";
+      if(Authentication.hasToken())
+      {
+        authorization = "Bearer " + Authentication.getToken();
+      }
+      
       urls.forEach(url => {
         const urlToGetInfo = constants.PROXY + '?url=' + encodeURIComponent(url)
         const table = L.DomUtil.create('table', 'table table-striped table-info')
         const tableBody = L.DomUtil.create('tbody', '', table)
 
-        $.get(urlToGetInfo).done(function (data) {
+        $.ajax({
+          url:urlToGetInfo,
+          beforeSend: function(request) {
+            request.setRequestHeader("Authorization", authorization);
+          }
+         }).done(function (data) {
           if (data.features.length > 0) {
             data.features.forEach(element => {
               /**
