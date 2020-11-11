@@ -4,6 +4,7 @@ require('terrabrasilis-timedimension')
 require('terrabrasilis-map-plugins')
 const leafletEsriGeocoding = require('esri-leaflet-geocoder')
 const utils = require('./src/utils')
+const ApiException = require("./src/api-exception")
 const { get, set } = require('lodash')
 const turf = require('./src/turf')
 
@@ -970,6 +971,7 @@ Terrabrasilis = (function () {
         remove: false,
       }
     }
+
 
     var turfLayer = L.geoJson(null, {
       style: function (feature) {
@@ -1967,13 +1969,18 @@ Terrabrasilis = (function () {
      * Enable or disable the TimeDimension layer for a WMS layer.
      * Optionally, you may use the option to aggregate times when walking through the timeline of a Layer.
      *
-     * @param {string} layerName The name of one layer that is already added in to map.
+     * @param {string} layerName The name of one layer that is already added in to map. Compose by "workspace:layername"
      * @param {boolean} aggregateTimes The control parameter to set the time aggregate option. Default is false.
      */
   const onOffTimeDimension = function (layerName, aggregateTimes = false) {
-    const isNewLayer = _ctrlTimer.layerName !== layerName
-    removeTimerControl()
-    if (isNewLayer) addTimerControl(layerName, aggregateTimes)
+    if (layerName.indexOf(':') > 0) {
+      const isNewLayer = _ctrlTimer.layerName !== layerName;
+      removeTimerControl();
+      if (isNewLayer) addTimerControl(layerName, aggregateTimes);
+    }else{
+      console.error("Fail to enable the TimeDimension tool. The workspace is missing to clearly identify the layer ("+layerName+").");
+      throw ApiException("Missing workspace");
+    }
   }
 
   /**
@@ -2057,8 +2064,8 @@ Terrabrasilis = (function () {
       }
     }
 
-    _ctrlTimer.control = L.control.timeDimension(options).addTo(map)
-    _ctrlTimer.layerName = layerName
+    _ctrlTimer.control = L.control.timeDimension(options).addTo(map);
+    _ctrlTimer.layerName = layerName;
     let workspace=layerName.split(":")[0];
     let name=layerName.split(":")[1];
     if (addLayerTimeDimension(workspace,name)) {
@@ -2105,10 +2112,10 @@ Terrabrasilis = (function () {
      * Create TimeDimension Layer if it not exists and add it to map.
      * Before add TimeDimension to map, removes the default Leaflef Layer from the map.
      *
-     * @param {string} layerName, the layer name
+     * @param {string} layerName, the layer name with workspace
      */
   const addLayerTimeDimension = function (workspace,layerName) {
-    var hasTimeLayer = getTimeLayer(layerName)
+    var hasTimeLayer = getTimeLayer(workspace+':'+layerName)
 
     if (hasTimeLayer && isLayerActived({ name: layerName, workspace: workspace })) {
       if (!_ctrlTimer.timeDimensionLayer) {
@@ -2132,14 +2139,13 @@ Terrabrasilis = (function () {
 
   const getTimeLayer = function (layerName) {
     if (layerName) {
-      if (layerName.indexOf(':') > 0) {
-        layerName = layerName.split(':')[1]
-      }
+      workspace = layerName.split(':')[0];
+      layerName = layerName.split(':')[1];
 
       for (const key in _timeConfigLayers) {
         if (_timeConfigLayers.hasOwnProperty(key)) {
           const layer = _timeConfigLayers[key]
-          
+
           var name = getLayerName(layer);
           
           if (name === layerName) 
