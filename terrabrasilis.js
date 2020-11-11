@@ -1391,8 +1391,8 @@ Terrabrasilis = (function () {
       var authorization = AuthenticationService.getBearer();
             
       urls.forEach(url => {
-        //const urlToGetInfo = constants.PROXY + '?url=' + encodeURIComponent(url)
-        const urlToGetInfo = "http://localhost/cgi-bin/proxy.cgi" + '?url=' + encodeURIComponent(url)
+        const urlToGetInfo = constants.PROXY + '?url=' + encodeURIComponent(url)
+       // const urlToGetInfo = "http://localhost/cgi-bin/proxy.cgi" + '?url=' + encodeURIComponent(url)
         const table = L.DomUtil.create('table', 'table table-striped table-info')
         const tableBody = L.DomUtil.create('tbody', '', table)
 
