@@ -576,6 +576,12 @@ Terrabrasilis = (function () {
             _baselayer: ol.baselayer,
             zIndex: ol.stackOrder
           }
+
+          if(ol.filter)
+          {
+            options.time=ol.filter.time;
+          }
+
           if (ol.subdomains != null) {
             if (ol.subdomains.length > 0) {
               // let domains = [];
