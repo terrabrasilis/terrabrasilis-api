@@ -2216,13 +2216,14 @@ Terrabrasilis = (function () {
    *          valid examples: 2017/2017 2017-01/2017-02 2017-06-31/2017-06-31  
    */
   const filterLayers = function (filters) {
-    filters.map(({name, workspace, time}) => {
-      let completeLayerName = workspace + ":" + name;
+    filters.map(({layerName, workspace, time}) => {
+      let completeLayerName = workspace + ":" + layerName;
       const layer = getLayerByName(completeLayerName);
       if(!layer) return
       layer.setParams({ time });
-      layer.redraw();  
+      layer.redraw();
     })
+    
   }
 /**
  * This method can be invoked to updateLayer values syncronizing appLayers to leafletLayers.
