@@ -1495,6 +1495,11 @@ Terrabrasilis = (function () {
           typename: layer.wmsParams.layers
         }
 
+        if(layer.wmsParams.time)
+        {
+          defaultParams.time=layer.wmsParams.time
+        }
+
         var paramsOptions = {
           info_format: 'application/json'
         }
