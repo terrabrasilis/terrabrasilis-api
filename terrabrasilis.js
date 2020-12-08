@@ -71,7 +71,7 @@ Terrabrasilis = (function () {
      * @param {*} lon
      * @param {*} zoom
      */
-  const mountMap = function (lat, lon, zoom, container) {
+  const mountMap = function (lat, lon, stateChangedCallback, zoom, container) {
     if (typeof (lat) === 'undefined' || lat === null) { lat = defaultLat }
 
     if (typeof (lon) === 'undefined' || lon === null) { lon = defaultLon }
@@ -103,6 +103,8 @@ Terrabrasilis = (function () {
       }]
     }).setView([lon, lat], zoom)
 
+
+
     localStorage.setItem('lat', lat)
     localStorage.setItem('lon', lon)
     localStorage.setItem('zoom', zoom)
@@ -124,6 +126,13 @@ Terrabrasilis = (function () {
 
       // console.log("add scale -> " + map.getZoom());
     })
+
+    if(stateChangedCallback!=null)
+    {
+      map.on('zoomend', stateChangedCallback);
+
+      map.on('moveend', stateChangedCallback);
+    }
 
     resultsGetFeatureInfo = L.layerGroup().addTo(map)
 
@@ -1517,6 +1526,18 @@ Terrabrasilis = (function () {
     return result
   }
 
+  const getBounds = function () 
+  {
+    return map.getBounds();
+  }
+
+  const getCRS = function () 
+  {
+    return map.options.crs;
+  }
+
+  
+
   /**
      * This method try to find the layer identified by name excluding the Layers with time dimension enabled.
      *
@@ -2359,6 +2380,8 @@ Terrabrasilis = (function () {
     enableLoading: enableLoading,
     disableLoading: disableLoading,
     fitBounds: fitBounds,
+    getBounds: getBounds,
+    getCRS: getCRS,
     getDimensions: getDimensions,
     updateLayers: updateLayers,
     removeAllTimerControl: removeAllTimerControl,
