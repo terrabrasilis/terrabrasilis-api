@@ -7,6 +7,7 @@ const utils = require('./src/utils')
 const ApiException = require("./src/api-exception")
 const { get, set } = require('lodash')
 const turf = require('./src/turf')
+const { stat } = require('fs')
 
 /**
  * This class use the Revealing Module Pattern.
@@ -25,6 +26,7 @@ Terrabrasilis = (function () {
   let overLayersToShow
   let legendToShow
   let layerControl
+  let stateChangedCallback
   const defaultLat = -52.685277
   const defaultLon = -11.678782
   const defaultZoom = 5
@@ -80,6 +82,8 @@ Terrabrasilis = (function () {
 
     if (typeof (container) === 'undefined' || container === null) { container = defaultMapContainer }
 
+    this.stateChangedCallback = stateChangedCallback;
+
     // icons: https://icons8.com/icon/set/map/metro
     map = L.map(container, {
       scrollWheelZoom: true,
@@ -127,11 +131,11 @@ Terrabrasilis = (function () {
       // console.log("add scale -> " + map.getZoom());
     })
 
-    if(stateChangedCallback!=null)
+    if(this.stateChangedCallback!=null)
     {
-      map.on('zoomend', stateChangedCallback);
+      map.on('zoomend', this.stateChangedCallback);
 
-      map.on('moveend', stateChangedCallback);
+      map.on('moveend', this.stateChangedCallback);
     }
 
     resultsGetFeatureInfo = L.layerGroup().addTo(map)
@@ -2255,7 +2259,7 @@ Terrabrasilis = (function () {
       layer.setParams({ time });
       layer.redraw();
     })
-    
+    this.stateChangedCallback();
   }
 /**
  * This method can be invoked to updateLayer values syncronizing appLayers to leafletLayers.
