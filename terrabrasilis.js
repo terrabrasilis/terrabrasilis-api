@@ -1499,6 +1499,7 @@ Terrabrasilis = (function () {
 
   /**
      * This method try to find the layer identified by name excluding the Layers with time dimension enabled.
+     * If the layer you are looking for is a base layer, the workspace does not exist, so it should be tested.
      *
      * @param {*} layerName is the name of layer including the workspace ("workspace:layername")
      */
@@ -1509,27 +1510,22 @@ Terrabrasilis = (function () {
       return null
     }
 
+    // remove the separator character if the workspace does not exist
+    if (layerName.indexOf(':') == 0) {
+      layerName=layerName.split(':')[1];
+    }
+
     let layer = null
     map.eachLayer(l => {
-      if(layer==null)
-      {
-        if(l.options.layers)
-        {
-          if (l.options.layers === layerName ) {
-            layer = l
-          }
-        } 
-        else
-        {
-          if(l.options._name)
-          {
-            if (l.options._name === layerName ) {
-              layer = l
-            }
-          }
+      if(!layer) {
+        if (l.options._baselayer && l.options._name === layerName) {
+          layer = l
+        }
+        else if (l.options.layers && l.options.layers === layerName) {
+          layer = l
         }
       }
-    })
+    });
 
     return layer
   }
