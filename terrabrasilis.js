@@ -7,6 +7,7 @@ const utils = require('./src/utils')
 const ApiException = require("./src/api-exception")
 const { get, set } = require('lodash')
 const turf = require('./src/turf')
+const { stat } = require('fs')
 
 /**
  * This class use the Revealing Module Pattern.
@@ -25,6 +26,7 @@ Terrabrasilis = (function () {
   let overLayersToShow
   let legendToShow
   let layerControl
+  let stateChangedCallback
   const defaultLat = -52.685277
   const defaultLon = -11.678782
   const defaultZoom = 5
@@ -71,7 +73,7 @@ Terrabrasilis = (function () {
      * @param {*} lon
      * @param {*} zoom
      */
-  const mountMap = function (lat, lon, zoom, container) {
+  const mountMap = function (lat, lon, stateChangedCallback, zoom, container) {
     if (typeof (lat) === 'undefined' || lat === null) { lat = defaultLat }
 
     if (typeof (lon) === 'undefined' || lon === null) { lon = defaultLon }
@@ -79,6 +81,8 @@ Terrabrasilis = (function () {
     if (typeof (zoom) === 'undefined' || zoom === null) { zoom = defaultZoom }
 
     if (typeof (container) === 'undefined' || container === null) { container = defaultMapContainer }
+
+    this.stateChangedCallback = stateChangedCallback;
 
     // icons: https://icons8.com/icon/set/map/metro
     map = L.map(container, {
@@ -103,6 +107,8 @@ Terrabrasilis = (function () {
       }]
     }).setView([lon, lat], zoom)
 
+
+
     localStorage.setItem('lat', lat)
     localStorage.setItem('lon', lon)
     localStorage.setItem('zoom', zoom)
@@ -124,6 +130,13 @@ Terrabrasilis = (function () {
 
       // console.log("add scale -> " + map.getZoom());
     })
+
+    if(this.stateChangedCallback!=null)
+    {
+      map.on('zoomend', this.stateChangedCallback);
+
+      map.on('moveend', this.stateChangedCallback);
+    }
 
     resultsGetFeatureInfo = L.layerGroup().addTo(map)
 
@@ -576,6 +589,12 @@ Terrabrasilis = (function () {
             _baselayer: ol.baselayer,
             zIndex: ol.stackOrder
           }
+
+          if(ol.filter)
+          {
+            options.time=ol.filter.time;
+          }
+
           if (ol.subdomains != null) {
             if (ol.subdomains.length > 0) {
               // let domains = [];
@@ -1391,8 +1410,8 @@ Terrabrasilis = (function () {
       var authorization = AuthenticationService.getBearer();
             
       urls.forEach(url => {
-        //const urlToGetInfo = constants.PROXY + '?url=' + encodeURIComponent(url)
-        const urlToGetInfo = "http://localhost/cgi-bin/proxy.cgi" + '?url=' + encodeURIComponent(url)
+        const urlToGetInfo = constants.PROXY + '?url=' + encodeURIComponent(url)
+       // const urlToGetInfo = "http://localhost/cgi-bin/proxy.cgi" + '?url=' + encodeURIComponent(url)
         const table = L.DomUtil.create('table', 'table table-striped table-info')
         const tableBody = L.DomUtil.create('tbody', '', table)
 
@@ -1489,6 +1508,11 @@ Terrabrasilis = (function () {
           typename: layer.wmsParams.layers
         }
 
+        if(layer.wmsParams.time)
+        {
+          defaultParams.time=layer.wmsParams.time
+        }
+
         var paramsOptions = {
           info_format: 'application/json'
         }
@@ -1505,6 +1529,18 @@ Terrabrasilis = (function () {
     })
     return result
   }
+
+  const getBounds = function () 
+  {
+    return map.getBounds();
+  }
+
+  const getCRS = function () 
+  {
+    return map.options.crs;
+  }
+
+  
 
   /**
      * This method try to find the layer identified by name excluding the Layers with time dimension enabled.
@@ -2212,13 +2248,14 @@ Terrabrasilis = (function () {
    *          valid examples: 2017/2017 2017-01/2017-02 2017-06-31/2017-06-31  
    */
   const filterLayers = function (filters) {
-    filters.map(({name, workspace, time}) => {
-      let completeLayerName = workspace + ":" + name;
+    filters.map(({layerName, workspace, time}) => {
+      let completeLayerName = workspace + ":" + layerName;
       const layer = getLayerByName(completeLayerName);
       if(!layer) return
       layer.setParams({ time });
-      layer.redraw();  
+      layer.redraw();
     })
+    this.stateChangedCallback();
   }
 /**
  * This method can be invoked to updateLayer values syncronizing appLayers to leafletLayers.
@@ -2343,6 +2380,8 @@ Terrabrasilis = (function () {
     enableLoading: enableLoading,
     disableLoading: disableLoading,
     fitBounds: fitBounds,
+    getBounds: getBounds,
+    getCRS: getCRS,
     getDimensions: getDimensions,
     updateLayers: updateLayers,
     removeAllTimerControl: removeAllTimerControl,
