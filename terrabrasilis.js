@@ -2116,12 +2116,13 @@ Terrabrasilis = (function () {
      */
   const createTimeDimensionLayerFromConfig = function (layerConfig) 
   {
+    let url = getLayerBaseURL(layerConfig);
     
     var layerName = getLayerName(layerConfig);
     var tdOptions = {
       timeDimension: _ctrlTimer.timeDimension,
       requestTimeFromCapabilities: true,
-      getCapabilitiesUrl: layerConfig.datasource.host.replace('ows', layerConfig.workspace + '/' + layerConfig.name + '/ows'),
+      getCapabilitiesUrl: url,
       setDefaultTime: true,
       getCapabilitiesLayerName: layerConfig.name,
       wmsVersion: '1.3.0',
@@ -2140,6 +2141,25 @@ Terrabrasilis = (function () {
 
     return timeDimensionLayer;
   }
+  const getLayerBaseURL = function (layer) 
+  {
+    //Fill with workspace on URL
+    let url = layer.datasource.host;
+    if(layer.datasource.host.includes(layer.workspace))
+    {
+      url = url.replace(layer.workspace+"/", "");
+    }    
+    if(layer.datasource.host.includes(layer.name))
+    {      
+      url = url.replace(layer.name+"/", "");
+    }
+    else
+    {
+      url = url.replace('ows', layer.workspace + '/' + layer.name + '/ows');
+      return url;
+    }
+  }
+
   /**
      * Create TimeDimension Layer if it not exists and add it to map.
      * Before add TimeDimension to map, removes the default Leaflef Layer from the map.
