@@ -2301,12 +2301,17 @@ Terrabrasilis = (function () {
         leafLetLayer.options.layers = appLayer.workspace + ":" + appLayer.nameAuthenticated;
         leafLetLayer.options._name = appLayer.nameAuthenticated;
         leafLetLayer.wmsParams.access_token=AuthenticationService.getToken();
+        if(appLayer.datasource.authenticationProxyUrl)
+        {
+          leafLetLayer._url = appLayer.datasource.authenticationProxyUrl + appLayer.datasource.host;
+        }        
       }
       else
       {
         leafLetLayer.options.layers = appLayer.workspace + ":" + appLayer.name;
         leafLetLayer.options._name = appLayer.name;
-        leafLetLayer.wmsParams.access_token=null;
+        leafLetLayer.wmsParams.access_token=null;        
+        leafLetLayer._url = appLayer.datasource.host;                
       }
       //Updating LeafLet wmsParams
       leafLetLayer.wmsParams.layers = leafLetLayer.options.layers; 
