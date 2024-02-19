@@ -109,6 +109,8 @@ Terrabrasilis = (function () {
       }]
     }).setView([lon, lat], zoom)
 
+
+
     localStorage.setItem('lat', lat)
     localStorage.setItem('lon', lon)
     localStorage.setItem('zoom', zoom)
@@ -592,12 +594,8 @@ Terrabrasilis = (function () {
             }
           }
 
-          const header = [
-            { header: "Authorization", value: "Bearer teste"}
-          ];
-
           const host = ol.datasource.host; //.replace('ows', 'gwc/service/wms')
-          var overlayer = L.tileLayer.wmsHeader(host, options, header);
+          var overlayer = L.tileLayer.wms(host, options);
           overlayers[ol.id] = overlayer;
           if (ol.timeDimension) {
             // Show one button to enable/disable the TimerControl over map.
