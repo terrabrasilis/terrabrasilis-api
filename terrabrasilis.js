@@ -2324,7 +2324,8 @@ Terrabrasilis = (function () {
           leafLetLayer._url = appLayer.datasource.authenticationProxyUrl + appLayer.datasource.host;
           leafLetLayer.headers = [
             {
-              "Authorization":"Bearer " + AuthenticationService.getToken()
+              header: "Authorization",
+              value: "Bearer " + AuthenticationService.getToken()
             }
           ]
         }        
