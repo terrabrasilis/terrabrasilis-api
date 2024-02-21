@@ -2130,7 +2130,7 @@ Terrabrasilis = (function () {
       getCapabilitiesParams: {}
     }
 
-    var token = AuthenticationService.getToken();
+        var token = AuthenticationService.getToken();
     tdOptions.getCapabilitiesParams = { access_token: token };
     
     const ll = getLayerByName(layerConfig.workspace+':'+layerName);
@@ -2158,6 +2158,7 @@ Terrabrasilis = (function () {
       url = url.replace('ows', layer.workspace + '/' + layer.name + '/ows');
       return url;
     }
+    
   }
 
   /**
