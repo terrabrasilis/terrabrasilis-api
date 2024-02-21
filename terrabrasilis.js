@@ -2158,7 +2158,7 @@ Terrabrasilis = (function () {
       url = url.replace('ows', layer.workspace + '/' + layer.name + '/ows');
       return url;
     }
-    
+
   }
 
   /**
@@ -2175,6 +2175,7 @@ Terrabrasilis = (function () {
         _ctrlTimer.timeDimensionLayer = createTimeDimensionLayerFromConfig(hasTimeLayer)
       }
 
+      
       _ctrlTimer.leafletLayer = getLayerByName(workspace+':'+layerName)
 
       // Removing the default Leaflet Layer from the map.
