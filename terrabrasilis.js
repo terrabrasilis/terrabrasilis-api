@@ -2129,15 +2129,10 @@ Terrabrasilis = (function () {
       proxy: null,
       getCapabilitiesParams: {}
     }
-
-        var token = AuthenticationService.getToken();
-    tdOptions.getCapabilitiesParams = { access_token: token };
-    
+   
     const ll = getLayerByName(layerConfig.workspace+':'+layerName);
     
     var timeDimensionLayer = L.timeDimension.layer.wms(ll, tdOptions);
-
-    timeDimensionLayer.setParams({access_token: AuthenticationService.getToken()});
 
     return timeDimensionLayer;
   }
@@ -2175,7 +2170,7 @@ Terrabrasilis = (function () {
         _ctrlTimer.timeDimensionLayer = createTimeDimensionLayerFromConfig(hasTimeLayer)
       }
 
-      
+
       _ctrlTimer.leafletLayer = getLayerByName(workspace+':'+layerName)
 
       // Removing the default Leaflet Layer from the map.
@@ -2320,7 +2315,6 @@ Terrabrasilis = (function () {
       {
         leafLetLayer.options.layers = appLayer.workspace + ":" + appLayer.nameAuthenticated;
         leafLetLayer.options._name = appLayer.nameAuthenticated;
-        leafLetLayer.wmsParams.access_token=AuthenticationService.getToken();
         if(appLayer.datasource.authenticationProxyUrl)
         {
           leafLetLayer._url = appLayer.datasource.authenticationProxyUrl + appLayer.datasource.host;
@@ -2336,7 +2330,6 @@ Terrabrasilis = (function () {
       {
         leafLetLayer.options.layers = appLayer.workspace + ":" + appLayer.name;
         leafLetLayer.options._name = appLayer.name;
-        leafLetLayer.wmsParams.access_token=null;        
         leafLetLayer._url = appLayer.datasource.host;                
         leafLetLayer.headers=[];
       }
