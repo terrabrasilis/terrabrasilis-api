@@ -2122,11 +2122,11 @@ Terrabrasilis = (function () {
     var tdOptions = {
       timeDimension: _ctrlTimer.timeDimension,
       requestTimeFromCapabilities: true,
-      getCapabilitiesUrl: url,
+      getCapabilitiesUrl: null,
       setDefaultTime: true,
       getCapabilitiesLayerName: layerConfig.name,
       wmsVersion: '1.3.0',
-      proxy: constants.PROXY,
+      proxy: null,
       getCapabilitiesParams: {}
     }
 
