@@ -2354,13 +2354,16 @@ Terrabrasilis = (function () {
           _headers[h.header] = h.value;
         });
       }
-      const controller = new AbortController();
-      const signal = controller.signal;
-      if (abort) {
-        abort.subscribe(() => {
-          controller.abort();
-        });
-      }
+      if(abort)
+      {
+        const controller = new AbortController();
+        const signal = controller.signal;
+        if (abort) {
+          abort.subscribe(() => {
+            controller.abort();
+          });
+        }
+      }      
       const f = await fetch(url, {
         method: "GET",
         headers: _headers,
@@ -2375,7 +2378,7 @@ Terrabrasilis = (function () {
       initialize: function (url, options, headers, abort, results) {
         L.TileLayer.WMS.prototype.initialize.call(this, url, options);
         this.headers = headers;
-        this.abort = abort;
+        //this.abort = abort;
         this.results = results;
       },
       createTile(coords, done) {
