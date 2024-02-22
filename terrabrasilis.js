@@ -2354,10 +2354,11 @@ Terrabrasilis = (function () {
           _headers[h.header] = h.value;
         });
       }
+      signal = null
       if(abort)
       {
         const controller = new AbortController();
-        const signal = controller.signal;
+        signal = controller.signal;
         if (abort) {
           abort.subscribe(() => {
             controller.abort();
