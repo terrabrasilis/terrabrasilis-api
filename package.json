@@ -26,7 +26,8 @@
     "lodash": "^4.17.15",
     "terrabrasilis-map-plugins": "terrabrasilis/terrabrasilis-map-plugins#master",
     "terrabrasilis-timedimension": "terrabrasilis/terrabrasilis-timedimension#v1.0.0",
-    "terrabrasilis-util": "terrabrasilis/terrabrasilis-util#master"
+    "terrabrasilis-util": "terrabrasilis/terrabrasilis-util#master",
+    "workerpool": "^9.1.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",

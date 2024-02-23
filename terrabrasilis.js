@@ -1,4 +1,4 @@
-const { Stack, Queue } = require('terrabrasilis-util')
+const { Stack, Queue, TilesWorkerPool } = require('terrabrasilis-util')
 const L = require('leaflet')
 require('terrabrasilis-timedimension')
 require('terrabrasilis-map-plugins')
@@ -2364,13 +2364,32 @@ Terrabrasilis = (function () {
             controller.abort();
           });
         }
-      }      
+      }
+      
+      TilesWorkerPool(10).addJob(this.fetchImageJob, callback, [headers, abort]);
+
+      // const f = await fetch(url, {
+      //   method: "GET",
+      //   headers: _headers,
+      //   mode: "cors",
+      //   signal: signal
+      // });
+
+      // const blob = await f.blob();
+      // callback(blob);
+
+
+    }
+
+    async function fetchImageJob(url, callback, headers, signal) {
+     
       const f = await fetch(url, {
         method: "GET",
-        headers: _headers,
+        headers: headers,
         mode: "cors",
         signal: signal
       });
+      
       const blob = await f.blob();
       callback(blob);
     }
@@ -2391,16 +2410,23 @@ Terrabrasilis = (function () {
     
         fetchImage(
           url,
-          resp => {
-            const reader = new FileReader();
-            reader.onload = () => {
-              img.src = reader.result;
-              if (self.results) {
-                self.results.next(reader.result);
+          ok,resp => {
+            if(ok)
+            {
+              const reader = new FileReader();
+              reader.onload = () => {
+                img.src = reader.result;
+                if (self.results) {
+                  self.results.next(reader.result);
+                };
               };
-            };
-            reader.readAsDataURL(resp);
-            done(null, img);
+              reader.readAsDataURL(resp);
+              done(null, img);
+            }
+            else
+            {
+              console.error(resp);
+            }           
           },
           this.headers,
           this.abort
