@@ -2366,7 +2366,7 @@ Terrabrasilis = (function () {
         }
       }
       
-      TilesWorkerPool(10).addJob(this.fetchImageJob, callback, [headers, abort]);
+      TilesWorkerPool.addJob(fetchImageJob, callback, [url, headers, abort]);
 
       // const f = await fetch(url, {
       //   method: "GET",
@@ -2381,7 +2381,7 @@ Terrabrasilis = (function () {
 
     }
 
-    async function fetchImageJob(url, callback, headers, signal) {
+    async function fetchImageJob(url, headers, signal) {
      
       const f = await fetch(url, {
         method: "GET",
@@ -2391,7 +2391,7 @@ Terrabrasilis = (function () {
       });
       
       const blob = await f.blob();
-      callback(blob);
+      return blob;
     }
     
     L.TileLayer.WMSHeader = L.TileLayer.WMS.extend({
@@ -2410,8 +2410,8 @@ Terrabrasilis = (function () {
     
         fetchImage(
           url,
-          ok,resp => {
-            if(ok)
+          function(status,resp) {
+            if(status && resp && resp.type=="image/png")
             {
               const reader = new FileReader();
               reader.onload = () => {
