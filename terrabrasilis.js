@@ -2364,12 +2364,14 @@ Terrabrasilis = (function () {
       }
     }
     
-    TilesWorkerPool.addJob(fetchImageJob, callback, [url, headers, abort]);
+    TilesWorkerPool.addJob(fetchImageJob, callback, [url, _headers, abort]);
 
   }
 
-  var fetchImageJob = async function(url, headers, signal) {
-   
+  var fetchImageJob = async function(url, headers, signal) {   
+
+    console.debug(headers);
+
     const f = await fetch(url, {
       method: "GET",
       headers: headers,
