@@ -2519,6 +2519,24 @@ L.SingleTile = L.ImageOverlay.extend({
 			src: ""
 		});
     
+    this._updateImage();
+
+	},
+
+	_onImageLoad: function () 
+  {
+    if(this._map)
+    {
+      this._bounds = this._map.getBounds();
+    
+      this._reset();      
+    } 
+    this.fire('load');
+	},
+
+  _updateImage: function ()
+  {
+
     let url = this._constructUrl();
     let img = this._image;
     let h = this.headers;
@@ -2546,26 +2564,15 @@ L.SingleTile = L.ImageOverlay.extend({
       h,
       a
     );
-
-	},
-
-	_onImageLoad: function () 
-  {
-    if(this._map)
-    {
-      this._bounds = this._map.getBounds();
-    
-      this._reset();      
-    } 
-    this.fire('load');
-	},
+  },
 
 	_updateImageUrl: function () 
   {
-    if(this._map)
-    {
-      this._image.src = this._constructUrl();
-    }
+    // if(this._map)
+    // {
+    //   this._image.src = this._constructUrl();
+    // }
+    this._updateImage();
 		
 	},
 
