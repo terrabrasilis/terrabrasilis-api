@@ -2345,54 +2345,45 @@ Terrabrasilis = (function () {
     }
    }
 
-   const configureWMSHeaderLayerType = function()
-   {
-    async function fetchImage(url, callback, headers, abort) {
-      let _headers = {};
-      if (headers) {
-        headers.forEach(h => {
-          _headers[h.header] = h.value;
+   var fetchImage = async function(url, callback, headers, abort) {
+    let _headers = {};
+    if (headers) {
+      headers.forEach(h => {
+        _headers[h.header] = h.value;
+      });
+    }
+    signal = null
+    if(abort)
+    {
+      const controller = new AbortController();
+      signal = controller.signal;
+      if (abort) {
+        abort.subscribe(() => {
+          controller.abort();
         });
       }
-      signal = null
-      if(abort)
-      {
-        const controller = new AbortController();
-        signal = controller.signal;
-        if (abort) {
-          abort.subscribe(() => {
-            controller.abort();
-          });
-        }
-      }
-      
-      TilesWorkerPool.addJob(fetchImageJob, callback, [url, headers, abort]);
-
-      // const f = await fetch(url, {
-      //   method: "GET",
-      //   headers: _headers,
-      //   mode: "cors",
-      //   signal: signal
-      // });
-
-      // const blob = await f.blob();
-      // callback(blob);
-
-
     }
+    
+    TilesWorkerPool.addJob(fetchImageJob, callback, [url, headers, abort]);
 
-    async function fetchImageJob(url, headers, signal) {
-     
-      const f = await fetch(url, {
-        method: "GET",
-        headers: headers,
-        mode: "cors",
-        signal: signal
-      });
-      
-      const blob = await f.blob();
-      return blob;
-    }
+  }
+
+  var fetchImageJob = async function(url, headers, signal) {
+   
+    const f = await fetch(url, {
+      method: "GET",
+      headers: headers,
+      mode: "cors",
+      signal: signal
+    });
+    
+    const blob = await f.blob();
+    return blob;
+  }
+
+   const configureWMSHeaderLayerType = function()
+   {
+
     
     L.TileLayer.WMSHeader = L.TileLayer.WMS.extend({
       initialize: function (url, options, headers, abort, results) {
@@ -2463,13 +2454,16 @@ L.SingleTile = L.ImageOverlay.extend({
   // _originalUpdate: L.NonTiledLayer.prototype._update,
   // _originalOnRemove: L.NonTiledLayer.prototype.onRemove,
 
-	initialize: function( url, options) 
+	initialize: function( url, options, headers, abort, results) 
   {
 		this.wmsParams = L.extend({      
     }, this.defaultWmsParams);
     this.wmsParams.layers=options.wmsParams.layers;
     this.wmsParams.format=options.wmsParams.format;
     this.wmsParams.time=options.wmsParams.time;
+    this.headers = headers;
+    //this.abort = abort;
+    this.results = results;
 
     //console.log("Initializating layer: " + options.wmsParams.time);
 		L.ImageOverlay.prototype.initialize.call(this, url, null, options);
@@ -2519,8 +2513,35 @@ L.SingleTile = L.ImageOverlay.extend({
 			onselectstart: L.Util.falseFn,
 			onmousemove: L.Util.falseFn,
 			onload: L.bind(this._onImageLoad, this),
-			src: this._constructUrl()
+			src: ""
 		});
+    
+    let url = this._constructUrl();
+    let img = this._image;
+    fetchImage(
+      url,
+      function(status,resp) {
+        if(status && resp && resp.type=="image/png")
+        {
+          const reader = new FileReader();
+          reader.onload = () => {
+            img.src = reader.result;
+            if (self.results) {
+              self.results.next(reader.result);
+            };
+          };
+          reader.readAsDataURL(resp);
+          //done(null, this._image);
+        }
+        else
+        {
+          console.error(resp);
+        }           
+      },
+      this.headers,
+      this.abort
+    );
+
 	},
 
 	_onImageLoad: function () 
@@ -2581,8 +2602,8 @@ show: function() {
 },
 });
 
-L.singleTile = function (url, options) {
-	return new L.SingleTile(url, options);
+L.singleTile = function (url, options, headers, abort, results) {
+	return new L.SingleTile(url, options, headers, abort, results);
 };
 
 
