@@ -2396,7 +2396,8 @@ Terrabrasilis = (function () {
         const url = this.getTileUrl(coords);
         const img = document.createElement("img");
         img.setAttribute("role", "presentation");
-    
+        let h = this.headers;
+        let a = this.abort;
         self = this;
     
         fetchImage(
@@ -2419,8 +2420,8 @@ Terrabrasilis = (function () {
               console.error(resp);
             }           
           },
-          this.headers,
-          this.abort
+          h,
+          a
         );
         return img;
       }
@@ -2518,6 +2519,8 @@ L.SingleTile = L.ImageOverlay.extend({
     
     let url = this._constructUrl();
     let img = this._image;
+    let h = this.headers;
+    let a = this.abort;
     fetchImage(
       url,
       function(status,resp) {
@@ -2538,8 +2541,8 @@ L.SingleTile = L.ImageOverlay.extend({
           console.error(resp);
         }           
       },
-      this.headers,
-      this.abort
+      h,
+      a
     );
 
 	},
