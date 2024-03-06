@@ -2599,17 +2599,17 @@ isLoaded: function() {
 },
 hide: function() {
   this._visible = false;
-  if(this._div)
+  if(this._image)
   {
-    this._div.style.display = 'none';
+    this._image.style.display = 'none';
   }  
 },
 
 show: function() {
   this._visible = true;
-  if(this._div)
+  if(this._image)
   {    
-    this._div.style.display = 'block';
+    this._image.style.display = 'block';
   }
 },
 });
