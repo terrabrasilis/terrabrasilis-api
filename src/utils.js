@@ -103,9 +103,28 @@ const Utils = {
   },
 
   configureUrlWorkspace: (layerConfig) => {
-    let baseUrl = layerConfig.datasource.host.replace('ows', layerConfig.workspace + '/' + layerConfig.name + '/ows')
+    let baseUrl = Utils.getLayerBaseURL(layerConfig);
     baseUrl += `?REQUEST=GetCapabilities&VERSION=1.3.0&SERVICE=wms` 
     return baseUrl
+  },
+
+  getLayerBaseURL(layer)
+  {
+    //Fill with workspace on URL
+    let url = layer.datasource.host;
+    if(layer.datasource.host.includes(layer.workspace))
+    {
+      url = url.replace(layer.workspace+"/", "");
+    }    
+    if(layer.datasource.host.includes(layer.name))
+    {      
+      url = url.replace(layer.name+"/", "");
+    }
+    else
+    {
+      url = url.replace('ows', layer.workspace + '/' + layer.name + '/ows');
+      return url;
+    }
   },
 
   parseXML: xmlString => {
