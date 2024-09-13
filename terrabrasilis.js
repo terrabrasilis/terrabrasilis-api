@@ -28,13 +28,13 @@ Terrabrasilis = (function () {
   let layerControl;
   let stateChangedCallback;
   let dl=document.location;
-  let base_url=(dl.hostname!='localhost')?(dl.protocol+'//'+dl.hostname):(dl.protocol+'//terrabrasilis.dpi.inpe.br');
+  let base_url=dl.protocol+'//'+dl.hostname;
   const defaultLat = -52.685277;
   const defaultLon = -11.678782;
   const defaultZoom = 5;
   const defaultMapContainer = 'map';
   const constants = {
-    PROXY: base_url+'/proxy'
+    PROXY: base_url+'/oauth-api/publicproxy'
   }
   let resultsGetFeatureInfo
 
