@@ -2315,16 +2315,19 @@ Terrabrasilis = (function () {
       {
         leafLetLayer.options.layers = appLayer.workspace + ":" + appLayer.nameAuthenticated;
         leafLetLayer.options._name = appLayer.nameAuthenticated;
-        if(appLayer.datasource.authenticationProxyUrl)
-        {
-          leafLetLayer._url = appLayer.datasource.authenticationProxyUrl + appLayer.datasource.host;
-          leafLetLayer.headers = [
-            {
-              header: "Authorization",
-              value: "Bearer " + AuthenticationService.getToken()
-            }
-          ]
-        }        
+        // if(appLayer.datasource.authenticationProxyUrl)
+        // {
+        leafLetLayer._url = Authentication.getOAuthProxyUrl(appLayer.datasource.host, AuthenticationService.getOAuthClientId(), AuthenticationService.getOAuthResouceRole());
+
+        //leafLetLayer._url = appLayer.datasource.authenticationProxyUrl + appLayer.datasource.host;
+
+        leafLetLayer.headers = [
+          {
+            header: "Authorization",
+            value: "Bearer " + AuthenticationService.getToken()
+          }
+        ]
+        //}        
       }
       else
       {
@@ -2345,16 +2348,16 @@ Terrabrasilis = (function () {
     }
    }
 
-   var fetchImage = async function(url, callback, headers, abort) {
+   var fetchImage = async function(key, url, callback, headers, abort) {
     let _headers = {};
     if (headers) {
       headers.forEach(h => {
         _headers[h.header] = h.value;
       });
     }
-    signal = null
     if(abort)
     {
+      //console.log("Aborting");
       const controller = new AbortController();
       signal = controller.signal;
       if (abort) {
@@ -2364,13 +2367,11 @@ Terrabrasilis = (function () {
       }
     }
     
-    TilesWorkerPool.addJob(fetchImageJob, callback, [url, _headers, abort]);
+    TilesWorkerPool.addJob(fetchImageJob, callback, [key, url, _headers, abort]);
 
   }
 
-  var fetchImageJob = async function(url, headers, signal) {   
-
-    console.debug(headers);
+  var fetchImageJob = async function(key, url, headers, signal) {   
 
     const f = await fetch(url, {
       method: "GET",
@@ -2391,7 +2392,7 @@ Terrabrasilis = (function () {
       initialize: function (url, options, headers, abort, results) {
         L.TileLayer.WMS.prototype.initialize.call(this, url, options);
         this.headers = headers;
-        //this.abort = abort;
+        this.abort = abort;
         this.results = results;
       },
       createTile(coords, done) {
@@ -2400,9 +2401,13 @@ Terrabrasilis = (function () {
         img.setAttribute("role", "presentation");
         let h = this.headers;
         let a = this.abort;
-        self = this;
-    
+        self = this;        
+        //let tileId = Math.floor(Math.random() * 1000000);
+        let key = this._tileCoordsToKey(coords);
+        img.setAttribute("id", key);        
+   
         fetchImage(
+          key,
           url,
           function(status,resp) {
             if(status && resp && resp.type=="image/png")
@@ -2423,9 +2428,25 @@ Terrabrasilis = (function () {
             }           
           },
           h,
-          a
+          this.abort
         );
         return img;
+      },
+      _removeTile(key) 
+      {        
+        const tile = this._tiles[key];
+        if (!tile) { return; }
+
+        //console.log("Cancelling (removeTile) tile: " + tile.abort);
+    
+        this._tiles[key].abort = true;
+
+        return L.TileLayer.WMS.prototype._removeTile.call(this, key);
+      },
+      _onTileRemove(e) 
+      {
+        //console.log("Cancelling (onTileRemove) tile: " + e.tile);
+        e.tile.onload = null;
       }
     });
     
