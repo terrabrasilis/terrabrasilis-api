@@ -14,11 +14,13 @@ const { stat } = require('fs')
  *
  * https://scotch.io/bar-talk/4-javascript-design-patterns-you-should-know#module-design-pattern
  */
+
 var Terrabrasilis
 Terrabrasilis = (function () {
   /**
      * variables
      */
+  let useTilesWorkerPool = true;
   let map;
   let mapScaleStack;
   let redoScaleQueue;
@@ -462,16 +464,13 @@ Terrabrasilis = (function () {
             _name: layerName,
             _baselayer: ol.baselayer,
             zIndex: zIndexCount++
-          }
-
-          
+          }          
 
           if (ol.subdomains != null) {
             if (ol.subdomains.length > 0) {
               options.subdomains = ol.subdomains;
             }
           }
-
 
           headers=[]
 
@@ -480,7 +479,8 @@ Terrabrasilis = (function () {
             headers = this.headersWithAuths
           }
 
-          var overlayer = new L.wmsHeader(ol.host, options, headers, null)
+          var overlayer = new L.wmsHeader(ol.host, options, headers, null);
+//          var overlayer = L.tileLayer.wms(ol.host, options)
           overlayers[ol.id] = overlayer;
 
           switchToAuthenticatedLayer(overlayer, ol, AuthenticationService.isAuthenticated());
@@ -614,6 +614,7 @@ Terrabrasilis = (function () {
 
           const host = ol.datasource.host; //.replace('ows', 'gwc/service/wms')
           var overlayer = new L.wmsHeader(host, options, headers, null);
+          //var overlayer = L.tileLayer.wms(ol.host, options);
           overlayers[ol.id] = overlayer;
           if (ol.timeDimension) {
             // Show one button to enable/disable the TimerControl over map.
@@ -2348,45 +2349,85 @@ Terrabrasilis = (function () {
     }
    }
 
-   var fetchImage = async function(key, url, callback, headers, abort) {
+   const addJob = function(id, url, callback, headers, tilesControl, signal)
+   {
+      tilesControl.set(id, id);
+
+      if(useTilesWorkerPool==true)
+      {
+        TilesWorkerPool.addJob(id, fetchImageJob, callback, tilesControl, [id, url, headers, tilesControl, null]);
+      }
+      else
+      {
+        fetchImageJob(id, url, headers, tilesControl, signal).then(function (result)
+        {
+          callback(id, true, result, tilesControl); 
+        })
+        .catch(function (err)
+        {
+          callback(id, false, err, tilesControl);
+        });      
+      }
+   }
+
+   const removeJob = function(id, tilesControl)
+   {     
+     tilesControl.delete(id);
+     //console.log(tilesControl.size);
+     console.log(document.getElementById("map").getElementsByTagName('*').length)
+   }
+
+   var fetchImage = async function(id, url, callback, headers, abort, requests, tilesControl) {
     let _headers = {};
     if (headers) {
       headers.forEach(h => {
         _headers[h.header] = h.value;
       });
     }
-    if(abort)
-    {
-      //console.log("Aborting");
-      const controller = new AbortController();
-      signal = controller.signal;
-      if (abort) {
-        abort.subscribe(() => {
-          controller.abort();
-        });
-      }
+
+    const controller = new AbortController();
+    signal = controller.signal;
+    if (abort) {
+      abort.subscribe(() => {
+        controller.abort();
+      });
     }
-    
-    TilesWorkerPool.addJob(fetchImageJob, callback, [key, url, _headers, abort]);
+
+    const request = {
+      url,
+      controller
+    };
+    requests.push(request);
+
+    addJob(id, url, callback, headers, tilesControl, signal);
 
   }
 
-  var fetchImageJob = async function(key, url, headers, signal) {   
+  var fetchImageJob = async function(id, url, headers, tilesControl, signal) {   
 
-    const f = await fetch(url, {
-      method: "GET",
-      headers: headers,
-      mode: "cors",
-      signal: signal
-    });
-    
-    const blob = await f.blob();
-    return blob;
+    let job = tilesControl.get(id);
+
+    if(job)
+    {
+      const f = await fetch(url, {
+        method: "GET",
+        headers: headers,
+        mode: "cors",
+        signal: signal
+      });      
+
+      const blob = await f.blob();
+      return blob;
+    }
+    else
+    {
+      console.log("Ignoring tile");
+      return null;
+    }
   }
 
    const configureWMSHeaderLayerType = function()
    {
-
     
     L.TileLayer.WMSHeader = L.TileLayer.WMS.extend({
       initialize: function (url, options, headers, abort, results) {
@@ -2394,6 +2435,8 @@ Terrabrasilis = (function () {
         this.headers = headers;
         this.abort = abort;
         this.results = results;
+        this.requests = [];
+        this.tilesControl = new Map();
       },
       createTile(coords, done) {
         const url = this.getTileUrl(coords);
@@ -2402,14 +2445,15 @@ Terrabrasilis = (function () {
         let h = this.headers;
         let a = this.abort;
         self = this;        
-        //let tileId = Math.floor(Math.random() * 1000000);
-        let key = this._tileCoordsToKey(coords);
-        img.setAttribute("id", key);        
+        let tileId = (Math.floor(Math.random() * 10000000)).toString();
+        //let key = this._tileCoordsToKey(coords);
+        img.setAttribute("id", tileId);  
+        img.setAttribute("data-url", url);      
    
         fetchImage(
-          key,
+          tileId,
           url,
-          function(status,resp) {
+          function(id, status,resp, tilesControl) {
             if(status && resp && resp.type=="image/png")
             {
               const reader = new FileReader();
@@ -2422,22 +2466,32 @@ Terrabrasilis = (function () {
               reader.readAsDataURL(resp);
               done(null, img);
             }
-            else
-            {
-              console.error(resp);
-            }           
+            // else
+            // {
+            //   console.error(resp);
+            // }
+            removeJob(id, tilesControl);        
           },
           h,
-          this.abort
+          this.abort,
+          this.requests,
+          this.tilesControl
         );
         return img;
       },
       _removeTile(key) 
       {        
         const tile = this._tiles[key];
-        if (!tile) { return; }
+        if (!tile) { return; }        
 
-        //console.log("Cancelling (removeTile) tile: " + tile.abort);
+        const url = tile.el.getAttribute("data-url");
+        const j = this.requests.findIndex(r => r && r.url === url);
+
+        if (j >= 0) {
+          this.requests[j].controller.abort();
+        }
+
+        removeJob(tile.el.id, this.tilesControl);
     
         this._tiles[key].abort = true;
 
@@ -2447,6 +2501,34 @@ Terrabrasilis = (function () {
       {
         //console.log("Cancelling (onTileRemove) tile: " + e.tile);
         e.tile.onload = null;
+      },
+      _abortLoading: function() {
+        for (const i in this._tiles) {
+          if (this._tiles[i].coords.z !== this._tileZoom) {
+            const tile = this._tiles[i].el;
+    
+            tile.onload = L.Util.falseFn;
+            tile.onerror = L.Util.falseFn;
+    
+            const url = tile.getAttribute("data-url");
+            const j = this.requests.findIndex(r => r && r.url === url);
+
+            removeJob(tile.id, this.tilesControl);
+
+            if (j >= 0) {
+              //console.log('Aborting JOB');
+
+              removeJob(tile.id, this.tilesControl);
+
+              this.requests[j].controller.abort();
+    
+              tile.src = L.Util.emptyImageUrl;
+              L.DomUtil.remove(tile);
+              delete this._tiles[i];
+              delete this.requests[j];
+            }
+          }
+        }
       }
     });
     
