@@ -2373,8 +2373,6 @@ Terrabrasilis = (function () {
    const removeJob = function(id, tilesControl)
    {     
      tilesControl.delete(id);
-     //console.log(tilesControl.size);
-     console.log(document.getElementById("map").getElementsByTagName('*').length)
    }
 
    var fetchImage = async function(id, url, callback, headers, abort, requests, tilesControl) {
@@ -2406,7 +2404,7 @@ Terrabrasilis = (function () {
   var fetchImageJob = async function(id, url, headers, tilesControl, signal) {   
 
     let job = tilesControl.get(id);
-
+    
     if(job)
     {
       const f = await fetch(url, {
@@ -2499,7 +2497,6 @@ Terrabrasilis = (function () {
       },
       _onTileRemove(e) 
       {
-        //console.log("Cancelling (onTileRemove) tile: " + e.tile);
         e.tile.onload = null;
       },
       _abortLoading: function() {
@@ -2516,8 +2513,6 @@ Terrabrasilis = (function () {
             removeJob(tile.id, this.tilesControl);
 
             if (j >= 0) {
-              //console.log('Aborting JOB');
-
               removeJob(tile.id, this.tilesControl);
 
               this.requests[j].controller.abort();
