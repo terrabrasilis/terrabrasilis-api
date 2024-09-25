@@ -1,6 +1,6 @@
 {
   "name": "terrabrasilis-api",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "API to build map and enable tools to use in Terrabrasilis webmap application",
   "main": "terrabrasilis.js",
   "scripts": {
@@ -26,7 +26,7 @@
     "lodash": "^4.17.15",
     "terrabrasilis-map-plugins": "terrabrasilis/terrabrasilis-map-plugins#master",
     "terrabrasilis-timedimension": "terrabrasilis/terrabrasilis-timedimension#v1.0.2",
-    "terrabrasilis-util": "terrabrasilis/terrabrasilis-util#v1.0.0"
+    "terrabrasilis-util": "terrabrasilis/terrabrasilis-util#v1.0.1"
   },
   "devDependencies": {
     "chai": "^4.2.0",
