@@ -2397,7 +2397,7 @@ Terrabrasilis = (function () {
     };
     requests.push(request);
 
-    addJob(id, url, callback, headers, tilesControl, signal);
+    addJob(id, url, callback, _headers, tilesControl, signal);
 
   }
 
